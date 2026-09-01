@@ -4,7 +4,7 @@ export default function KPICard({ title, value, note, icon: Icon }) {
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <span className="rounded-full border border-slate-500/20 px-2 py-1 text-xs font-semibold text-slate-500">+12.4%</span>
-        <h3 className={`mt-4 text-3xl font-semibold tracking-tight ${tone}`}>{value}</h3>
+        <h3 className={`mt-3 text-2xl font-semibold tracking-tight sm:mt-4 sm:text-3xl ${tone}`}>{value}</h3>
         <p className="mt-2 text-sm font-semibold text-navy">{title}</p>
         <p className="mt-1 text-xs text-slate-500">{note || "Compared with previous month"}</p>
       </div>

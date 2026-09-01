@@ -4,6 +4,6 @@ export default function ChartCard({ title, children }) {
       <div><h3 className="text-lg font-semibold text-navy">{title}</h3><p className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">January - August 2026</p></div>
       <span className="rounded-full border border-green/20 bg-green/10 px-2.5 py-1 text-xs font-semibold text-green">+18.4%</span>
     </div>
-    <div className="h-72">{children}</div>
+    <div className="h-64 sm:h-72">{children}</div>
   </section>;
 }
