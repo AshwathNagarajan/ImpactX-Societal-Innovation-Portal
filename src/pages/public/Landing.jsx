@@ -16,19 +16,30 @@ export default function Landing() {
       <div className="mx-auto grid max-w-7xl items-center gap-6 px-4 py-7 sm:gap-8 sm:py-10 lg:max-h-[65vh] lg:min-h-[520px] lg:grid-cols-[1.05fr_.95fr]">
         <div>
           <span className="rounded-full border border-blue/20 bg-blue/10 px-3 py-1 text-xs font-semibold text-blue sm:text-sm">AI-Powered Societal Innovation</span>
-          <h1 className="mt-4 max-w-4xl text-[2.45rem] font-semibold leading-[1.08] tracking-tight text-navy min-[420px]:text-4xl sm:mt-5 md:text-6xl">Transforming<br/>Societal Challenges<br/>Into <span className="impact-gradient-text">Real Impact.</span></h1>
+          <h1 className="mt-4 max-w-4xl text-[2.15rem] font-semibold leading-[1.1] tracking-tight text-navy min-[420px]:text-[2.45rem] sm:mt-5 md:text-5xl lg:text-6xl">Transforming Societal Challenges Into <span className="impact-gradient-text">Real Impact.</span></h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:mt-5 sm:text-lg sm:leading-8">Connecting communities, institutions, industries and government through one collaborative innovation ecosystem.</p>
-          <div className="mt-6 grid gap-3 sm:flex sm:flex-wrap"><Link to="/explore" className="impact-gradient rounded-xl px-5 py-3 text-center font-semibold text-[#041016] shadow-sm">Explore Challenges</Link><Link to="/submit" className="rounded-xl border border-slate-500/20 px-5 py-3 text-center font-semibold text-navy">Submit a Challenge</Link></div>
+          <div className="mt-6 grid gap-3 md:flex md:flex-wrap"><Link to="/explore" className="impact-gradient rounded-xl px-5 py-3 text-center font-semibold text-[#041016] shadow-sm">Explore Challenges</Link><Link to="/submit" className="rounded-xl border border-slate-500/20 px-5 py-3 text-center font-semibold text-navy">Submit a Challenge</Link></div>
         </div>
-        <div className="premium-surface relative min-h-[260px] overflow-hidden rounded-3xl border p-3 min-[420px]:min-h-[310px] sm:min-h-[430px] sm:p-8">
+        <div className="premium-surface rounded-3xl border p-4 md:hidden">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Collaboration Flow</p>
+          <div className="grid gap-2">
+            {["Citizen Submission", "AI Analysis", "Government Validation", "Institute + Industry", "Measured Impact"].map((step, i) => (
+              <div key={step} className="flex items-center gap-3 rounded-2xl border bg-[#0d1828] p-3">
+                <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-xs font-semibold ${i === 0 ? "impact-gradient text-[#041016]" : "bg-slate-100 text-blue"}`}>{i + 1}</span>
+                <span className="text-sm font-semibold text-navy">{step}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="premium-surface relative hidden min-h-[430px] overflow-hidden rounded-3xl border p-8 md:block">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(56,189,248,.14),transparent_35%)]"/>
           <div className="relative grid h-full place-items-center">
-            <div className="relative h-56 w-56 min-[420px]:h-64 min-[420px]:w-64 sm:h-80 sm:w-80">
+            <div className="relative h-56 w-56 min-[420px]:h-64 min-[420px]:w-64 lg:h-80 lg:w-80">
               {["Citizen","AI Analysis","Government","University","Industry","Impact"].map((n,i)=> {
                 const pos = [[38,0],[67,18],[67,60],[38,78],[8,60],[8,18]][i];
-                return <div key={n} className="absolute w-20 rounded-xl border border-blue/20 bg-[#0d1828]/90 p-2 text-center text-[11px] font-semibold text-navy shadow-lg min-[420px]:w-24 sm:w-28 sm:rounded-2xl sm:p-3 sm:text-sm" style={{left:`${pos[0]}%`,top:`${pos[1]}%`}}><span className="mx-auto mb-1.5 block h-2 w-2 rounded-full bg-blue"/>{n}</div>
+                return <div key={n} className="absolute w-20 rounded-xl border border-blue/20 bg-[#0d1828]/90 p-2 text-center text-[11px] font-semibold text-navy shadow-lg min-[420px]:w-24 lg:w-28 lg:rounded-2xl lg:p-3 lg:text-sm" style={{left:`${pos[0]}%`,top:`${pos[1]}%`}}><span className="mx-auto mb-1.5 block h-2 w-2 rounded-full bg-blue"/>{n}</div>
               })}
-              <div className="absolute left-1/2 top-1/2 grid h-18 w-18 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-blue/30 bg-[#08111f] text-center text-[11px] font-semibold text-blue shadow-[0_0_40px_rgba(56,189,248,.12)] sm:h-24 sm:w-24 sm:text-sm">IMPACTX<br/>Network</div>
+              <div className="absolute left-1/2 top-1/2 grid h-18 w-18 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-blue/30 bg-[#08111f] text-center text-[11px] font-semibold text-blue shadow-[0_0_40px_rgba(56,189,248,.12)] lg:h-24 lg:w-24 lg:text-sm">IMPACTX<br/>Network</div>
               <div className="absolute inset-10 rounded-full border border-slate-500/10"/>
               <div className="absolute inset-20 rounded-full border border-teal-400/10"/>
             </div>
@@ -39,9 +50,9 @@ export default function Landing() {
     <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
       <div className="mb-6 rounded-2xl border border-blue/10 bg-[#08111f]/80 p-4 sm:mb-8 sm:p-5">
         <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Live Impact</p>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-5">{[["1,248+","Challenges"],["64","Institutes"],["41","Industry Partners"],["93","Solutions Implemented"],["2.4L+","Lives Impacted"]].map(([v,l])=><div key={l} className="last:col-span-2 lg:last:col-span-1"><p className="impact-gradient-text text-2xl font-semibold sm:text-3xl">{v}</p><p className="mt-1 text-sm text-slate-500">{l}</p></div>)}</div>
+        <div className="grid gap-4 min-[440px]:grid-cols-2 lg:grid-cols-5">{[["1,248+","Challenges"],["64","Institutes"],["41","Industry Partners"],["93","Solutions Implemented"],["2.4L+","Lives Impacted"]].map(([v,l])=><div key={l} className="min-[440px]:last:col-span-2 lg:last:col-span-1"><p className="impact-gradient-text text-2xl font-semibold lg:text-3xl">{v}</p><p className="mt-1 text-sm text-slate-500">{l}</p></div>)}</div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{kpis.map(([t,v,n],i)=><KPICard key={t} title={t} value={v} note={n} icon={icons[i]}/>)}</div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">{kpis.map(([t,v,n],i)=><KPICard key={t} title={t} value={v} note={n} icon={icons[i]}/>)}</div>
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <ChartCard title="Challenges by Category"><ResponsiveContainer><BarChart data={chartData.category}><XAxis dataKey="name" hide/><YAxis/><Tooltip/><Bar dataKey="value" fill="#38BDF8" radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></ChartCard>
         <ChartCard title="Monthly Challenge Submissions"><ResponsiveContainer><LineChart data={chartData.monthly}><XAxis dataKey="month"/><YAxis/><Tooltip/><Line dataKey="submissions" stroke="#38BDF8" strokeWidth={3}/><Line dataKey="resolved" stroke="#14B8A6" strokeWidth={3}/></LineChart></ResponsiveContainer></ChartCard>
