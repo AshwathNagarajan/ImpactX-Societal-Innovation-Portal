@@ -1,10 +1,13 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { LogOut, Menu, Settings, UserCircle } from "lucide-react";
 import { logout } from "../../utils/auth.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 export default function Sidebar({ title, items }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  useEffect(() => setOpen(false), [location.pathname]);
   const signOut = () => { logout(); navigate("/login"); };
   const content = <aside className="flex h-full flex-col border-r bg-[#08111f]">
     <div className="border-b p-5">
@@ -20,6 +23,6 @@ export default function Sidebar({ title, items }) {
   return <>
     <button onClick={()=>setOpen(true)} className="fixed left-3 top-3 z-50 rounded-xl border border-blue/20 bg-[#08111f] p-2 text-blue lg:hidden"><Menu size={20}/></button>
     <div className="hidden h-screen w-72 shrink-0 lg:block">{content}</div>
-    {open && <div className="fixed inset-0 z-40 lg:hidden"><div className="absolute inset-0 bg-slate-950/40" onClick={()=>setOpen(false)}/><div className="relative h-full w-80 max-w-[85vw]">{content}</div></div>}
+    {open && <div className="fixed inset-0 z-40 lg:hidden"><div className="absolute inset-0 bg-slate-950/60" onClick={()=>setOpen(false)}/><div className="relative h-full w-[85vw] max-w-[300px]">{content}</div></div>}
   </>;
 }
