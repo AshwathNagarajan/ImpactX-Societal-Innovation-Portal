@@ -1,0 +1,3 @@
+import { teams } from "../../data/mockData.js";
+import ProgressBar from "../../components/common/ProgressBar.jsx";
+export default function TeamManagement(){return <div><h1 className="text-3xl font-bold text-navy">Team Management</h1><div className="mt-5 grid gap-4 lg:grid-cols-3">{teams.map(t=><article key={t.project} className="rounded-xl border bg-white p-5 shadow-sm"><h2 className="text-xl font-bold text-navy">{t.project}</h2><p className="mt-2 text-sm text-slate-600">Faculty mentor: {t.mentor}</p><p className="mt-2 text-sm text-slate-600">{t.students} students • {t.departments.join(", ")}</p><div className="mt-4"><ProgressBar value={t.progress}/></div></article>)}</div></div>}

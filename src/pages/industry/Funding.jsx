@@ -1,0 +1,4 @@
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+import { chartData } from "../../data/mockData.js";
+import ChartCard from "../../components/charts/ChartCard.jsx";
+export default function Funding(){return <div><h1 className="text-3xl font-semibold text-navy">Funding</h1><div className="mt-5 grid gap-4 lg:grid-cols-3">{["₹3.8 Cr committed","₹2.1 Cr utilized","18 projects funded"].map(x=><div key={x} className="premium-card rounded-2xl border p-5 text-2xl font-semibold text-navy">{x}</div>)}</div><div className="mt-6"><ChartCard title="Funding Utilization by Sector"><ResponsiveContainer><BarChart data={chartData.impact}><XAxis dataKey="sector"/><YAxis/><Tooltip/><Bar dataKey="impact" fill="#F59E0B"/></BarChart></ResponsiveContainer></ChartCard></div></div>}

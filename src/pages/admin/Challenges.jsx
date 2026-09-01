@@ -1,0 +1,5 @@
+import { challenges } from "../../data/mockData.js";
+import StatusBadge from "../../components/common/StatusBadge.jsx";
+import PriorityBadge from "../../components/common/PriorityBadge.jsx";
+export default function Challenges(){return <Table title="All Challenges" rows={challenges}/>}
+export function Table({title, rows=challenges}){return <div><h1 className="text-3xl font-bold text-navy">{title}</h1><div className="mt-5 overflow-x-auto rounded-xl border bg-white shadow-sm"><table className="min-w-[920px] w-full text-left text-sm"><thead className="bg-slate-50 text-slate-500"><tr>{["Challenge ID","Title","Category","District","Status","Priority","Affected"].map(h=><th key={h} className="p-3">{h}</th>)}</tr></thead><tbody>{rows.map(c=><tr key={c.id} className="border-t"><td className="p-3 font-bold text-blue">{c.id}</td><td className="p-3 font-semibold text-navy">{c.title}</td><td className="p-3">{c.category}</td><td className="p-3">{c.district}</td><td className="p-3"><StatusBadge status={c.status}/></td><td className="p-3"><PriorityBadge priority={c.priority}/></td><td className="p-3">{c.affected.toLocaleString()}</td></tr>)}</tbody></table></div></div>}
