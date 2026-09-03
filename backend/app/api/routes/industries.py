@@ -17,6 +17,11 @@ async def recommended_projects(user=Depends(require_industry)):
     return {"success": True, "items": await industry_service.recommended_projects()}
 
 
+@router.get("/recommendations")
+async def recommendations(user=Depends(require_industry)):
+    return {"success": True, "items": await industry_service.ai_recommendations(user)}
+
+
 @router.get("/projects")
 async def projects(user=Depends(require_industry)):
     return {"success": True, "items": await industry_service.recommended_projects()}

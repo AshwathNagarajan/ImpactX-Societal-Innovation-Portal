@@ -1,0 +1,2 @@
+"""AI RAG compatibility package."""
+

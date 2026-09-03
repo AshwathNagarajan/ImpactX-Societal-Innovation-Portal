@@ -104,6 +104,57 @@ CHALLENGES = [
     }
 ]
 
+PROJECTS = [
+    {
+        "project_id": "PRJ-0001",
+        "challenge_id": "IMPX-2026-0001",
+        "institute_id": "demo-institute",
+        "industry_ids": [],
+        "title": "Crop Doctor AI Field Prototype",
+        "status": "PROTOTYPE",
+        "team": {"departments": ["AI & Data Science", "Biotechnology"], "students": 6},
+        "mentor": "Prof. Arvind Rao",
+        "proposal": {
+            "technology": ["Computer Vision", "Mobile Application", "Field Advisory Dashboard"],
+            "required_support": ["Cloud Credits", "Technical Mentorship", "Pilot Support"],
+        },
+        "progress": 54,
+        "prototype_status": "IN_PROGRESS",
+        "pilot_status": "NOT_STARTED",
+        "implementation_status": "NOT_STARTED",
+        "impact_metrics": {"people_targeted": 5200, "pilot_villages": 3},
+    }
+]
+
+MILESTONES = [
+    {
+        "milestone_id": "MS-0001",
+        "project_id": "PRJ-0001",
+        "title": "Field Dataset Collection",
+        "description": "Collect crop image samples and farmer advisory requirements.",
+        "stage": "RESEARCH",
+        "assigned_to": "AI & DS Team",
+        "status": "COMPLETED",
+        "completion_percentage": 100,
+        "deliverables": ["Dataset register", "Field survey note"],
+        "evidence": [],
+        "review_comments": "Approved for prototype phase.",
+    },
+    {
+        "milestone_id": "MS-0002",
+        "project_id": "PRJ-0001",
+        "title": "Prototype Advisory App",
+        "description": "Build disease detection and advisory workflow for pilot testing.",
+        "stage": "PROTOTYPE",
+        "assigned_to": "CSE Prototype Team",
+        "status": "IN_PROGRESS",
+        "completion_percentage": 45,
+        "deliverables": ["Prototype APK", "Model evaluation report"],
+        "evidence": [],
+        "review_comments": "",
+    },
+]
+
 
 async def seed() -> None:
     await connect_to_mongo()
@@ -133,6 +184,10 @@ async def seed() -> None:
         await database.industries.update_one({"name": item["name"]}, {"$set": {**item, "updated_at": now}, "$setOnInsert": {"created_at": now}}, upsert=True)
     for item in CHALLENGES:
         await database.challenges.update_one({"challenge_id": item["challenge_id"]}, {"$set": {**item, "updated_at": now}, "$setOnInsert": {"created_at": now}}, upsert=True)
+    for item in PROJECTS:
+        await database.projects.update_one({"project_id": item["project_id"]}, {"$set": {**item, "updated_at": now}, "$setOnInsert": {"created_at": now}}, upsert=True)
+    for item in MILESTONES:
+        await database.milestones.update_one({"milestone_id": item["milestone_id"]}, {"$set": {**item, "updated_at": now}, "$setOnInsert": {"created_at": now}}, upsert=True)
 
     documents = load_documents()
     if documents:

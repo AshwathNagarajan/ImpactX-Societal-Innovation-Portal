@@ -22,6 +22,11 @@ async def recommended_challenges(user=Depends(require_institute)):
     return {"success": True, "items": await institute_service.recommended_challenges()}
 
 
+@router.get("/recommendations")
+async def recommendations(user=Depends(require_institute)):
+    return {"success": True, "items": await institute_service.ai_recommendations(user)}
+
+
 @router.post("/challenges/{challenge_id}/accept")
 async def accept_challenge(challenge_id: str, user=Depends(require_institute)):
     return await institute_service.accept_challenge(challenge_id, user)

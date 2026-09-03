@@ -8,10 +8,15 @@ class ProjectCreate(BaseModel):
     institute_id: str
     industry_ids: List[str] = []
     title: str
-    status: str = "ASSIGNED"
+    status: str = "PLANNING"
     team: Dict[str, Any] = {}
     mentor: str = ""
     proposal: Dict[str, Any] = {}
+
+
+class ProjectTransitionRequest(BaseModel):
+    target_status: str
+    note: str = ""
 
 
 class ProjectOut(ProjectCreate):
@@ -22,3 +27,4 @@ class ProjectOut(ProjectCreate):
     pilot_status: str = ""
     implementation_status: str = ""
     impact_metrics: Dict[str, Any] = {}
+    ai_roadmap: List[Dict[str, Any]] = []
