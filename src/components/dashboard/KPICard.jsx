@@ -1,14 +1,14 @@
 export default function KPICard({ title, value, note, icon: Icon }) {
   const tone = /pending|validation/i.test(title) ? "text-orange" : /impact|benefited|implemented|completed|citizens/i.test(title) ? "text-green" : /project|research|patent|startup/i.test(title) ? "text-purple" : "text-blue";
-  return <div className="premium-surface group w-full min-w-0 rounded-2xl border p-5 transition duration-200 hover:-translate-y-0.5 hover:border-blue/30">
-    <div className="flex items-start justify-between gap-3">
+  const iconTone = tone === "text-orange" ? "bg-orange/10 text-orange" : tone === "text-green" ? "bg-green/10 text-green" : tone === "text-purple" ? "bg-purple/10 text-purple" : "bg-blue/10 text-blue";
+  return <div className="group min-h-[140px] w-full min-w-0 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md md:p-7">
+    <div className="flex h-full items-start justify-between gap-5">
       <div className="min-w-0">
-        <span className="rounded-full border border-slate-500/20 px-2 py-1 text-xs font-semibold text-slate-500">+12.4%</span>
-        <h3 className={`mt-3 whitespace-nowrap text-2xl font-semibold tracking-tight sm:mt-4 sm:text-3xl ${tone}`}>{value}</h3>
-        <p className="mt-2 text-sm font-semibold text-navy">{title}</p>
-        <p className="mt-1 text-xs text-slate-500">{note || "Compared with previous month"}</p>
+        <p className="text-sm font-medium text-slate-500">{title}</p>
+        <h3 className={`mt-4 whitespace-nowrap text-3xl font-semibold tracking-tight md:text-4xl ${tone}`}>{value}</h3>
+        <p className="mt-3 text-sm leading-5 text-slate-500">{note || "Compared with previous month"}</p>
       </div>
-      {Icon && <span className="impact-gradient grid h-11 w-11 shrink-0 place-items-center rounded-xl text-[#041016]"><Icon size={20}/></span>}
+      {Icon && <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${iconTone}`}><Icon size={21}/></span>}
     </div>
   </div>;
 }

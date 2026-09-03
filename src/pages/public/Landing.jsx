@@ -8,38 +8,38 @@ import ChallengeCard from "../../components/challenges/ChallengeCard.jsx";
 import ProjectCard from "../../components/dashboard/ProjectCard.jsx";
 import InstituteCard from "../../components/dashboard/InstituteCard.jsx";
 import IndustryCard from "../../components/dashboard/IndustryCard.jsx";
-const colors = ["#38BDF8", "#14B8A6", "#8B5CF6", "#22C55E", "#F59E0B", "#64748B", "#0EA5E9"];
+const colors = ["#2563EB", "#0891B2", "#0D9488", "#7C3AED", "#16A34A", "#D97706", "#64748B"];
 const icons = [Workflow, ShieldCheck, Lightbulb, Award, Building2, Factory, Map, Users];
 export default function Landing() {
   return <div>
-    <section className="border-b bg-[#08111f]/50">
-      <div className="mx-auto grid max-w-7xl items-center gap-6 px-4 py-7 sm:gap-8 sm:py-10 lg:max-h-[65vh] lg:min-h-[520px] lg:grid-cols-[1.05fr_.95fr]">
+    <section className="border-b border-slate-200 bg-white">
+      <div className="mx-auto grid max-w-[1440px] items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:min-h-[70vh] lg:grid-cols-[1.04fr_.96fr] lg:px-10 xl:px-12">
         <div>
-          <span className="rounded-full border border-blue/20 bg-blue/10 px-3 py-1 text-xs font-semibold text-blue sm:text-sm">AI-Powered Societal Innovation</span>
-          <h1 className="mt-4 max-w-4xl text-[2.15rem] font-semibold leading-[1.1] tracking-tight text-navy min-[420px]:text-[2.45rem] sm:mt-5 md:text-5xl lg:text-6xl">Transforming Societal Challenges Into <span className="impact-gradient-text">Real Impact.</span></h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:mt-5 sm:text-lg sm:leading-8">Connecting communities, institutions, industries and government through one collaborative innovation ecosystem.</p>
-          <div className="mt-6 grid gap-3 md:flex md:flex-wrap"><Link to="/explore" className="impact-gradient rounded-xl px-5 py-3 text-center font-semibold text-[#041016] shadow-sm">Explore Challenges</Link><Link to="/submit" className="rounded-xl border border-slate-500/20 px-5 py-3 text-center font-semibold text-navy">Submit a Challenge</Link></div>
+          <span className="rounded-full border border-blue/20 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue sm:text-sm">AI-Powered Societal Innovation</span>
+          <h1 className="mt-6 max-w-4xl text-[2.5rem] font-semibold leading-[1.05] tracking-tight text-navy min-[420px]:text-[3rem] md:text-6xl lg:text-7xl">Transforming Societal Challenges Into <span className="impact-gradient-text">Real Impact.</span></h1>
+          <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">Connecting communities, institutions, industries and government through one collaborative innovation ecosystem.</p>
+          <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap"><Link to="/explore" className="impact-gradient rounded-xl px-6 py-3.5 text-center font-semibold text-white shadow-sm">Explore Challenges</Link><Link to="/submit" className="rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-center font-semibold text-navy shadow-sm">Submit a Challenge</Link></div>
         </div>
-        <div className="premium-surface rounded-3xl border p-4 md:hidden">
+        <div className="premium-surface rounded-3xl border p-5 md:hidden">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Collaboration Flow</p>
           <div className="grid gap-2">
             {["Citizen Submission", "AI Analysis", "Government Validation", "Institute + Industry", "Measured Impact"].map((step, i) => (
-              <div key={step} className="flex items-center gap-3 rounded-2xl border bg-[#0d1828] p-3">
-                <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-xs font-semibold ${i === 0 ? "impact-gradient text-[#041016]" : "bg-slate-100 text-blue"}`}>{i + 1}</span>
+              <div key={step} className="flex items-center gap-3 rounded-2xl border bg-white p-4">
+                <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-xs font-semibold ${i === 0 ? "impact-gradient text-white" : "bg-blue-50 text-blue"}`}>{i + 1}</span>
                 <span className="text-sm font-semibold text-navy">{step}</span>
               </div>
             ))}
           </div>
         </div>
-        <div className="premium-surface relative hidden min-h-[430px] overflow-hidden rounded-3xl border p-8 md:block">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(56,189,248,.14),transparent_35%)]"/>
+        <div className="premium-surface relative hidden min-h-[500px] overflow-hidden rounded-3xl border p-10 md:block">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(37,99,235,.10),transparent_35%)]"/>
           <div className="relative grid h-full place-items-center">
             <div className="relative h-56 w-56 min-[420px]:h-64 min-[420px]:w-64 lg:h-80 lg:w-80">
               {["Citizen","AI Analysis","Government","University","Industry","Impact"].map((n,i)=> {
                 const pos = [[38,0],[67,18],[67,60],[38,78],[8,60],[8,18]][i];
-                return <div key={n} className="absolute w-20 rounded-xl border border-blue/20 bg-[#0d1828]/90 p-2 text-center text-[11px] font-semibold text-navy shadow-lg min-[420px]:w-24 lg:w-28 lg:rounded-2xl lg:p-3 lg:text-sm" style={{left:`${pos[0]}%`,top:`${pos[1]}%`}}><span className="mx-auto mb-1.5 block h-2 w-2 rounded-full bg-blue"/>{n}</div>
+                return <div key={n} className="absolute w-20 rounded-xl border border-blue/20 bg-white/95 p-2 text-center text-[11px] font-semibold text-navy shadow-lg min-[420px]:w-24 lg:w-28 lg:rounded-2xl lg:p-3 lg:text-sm" style={{left:`${pos[0]}%`,top:`${pos[1]}%`}}><span className="mx-auto mb-1.5 block h-2 w-2 rounded-full bg-blue"/>{n}</div>
               })}
-              <div className="absolute left-1/2 top-1/2 grid h-18 w-18 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-blue/30 bg-[#08111f] text-center text-[11px] font-semibold text-blue shadow-[0_0_40px_rgba(56,189,248,.12)] lg:h-24 lg:w-24 lg:text-sm">IMPACTX<br/>Network</div>
+              <div className="absolute left-1/2 top-1/2 grid h-18 w-18 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-blue/20 bg-white text-center text-[11px] font-semibold text-blue shadow-lg lg:h-24 lg:w-24 lg:text-sm">IMPACTX<br/>Network</div>
               <div className="absolute inset-10 rounded-full border border-slate-500/10"/>
               <div className="absolute inset-20 rounded-full border border-teal-400/10"/>
             </div>
@@ -47,26 +47,26 @@ export default function Landing() {
         </div>
       </div>
     </section>
-    <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
-      <div className="mb-6 rounded-2xl border border-blue/10 bg-[#08111f]/80 p-4 sm:mb-8 sm:p-5">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Live Impact</p>
-        <div className="grid gap-4 min-[440px]:grid-cols-2 lg:grid-cols-5">{[["1,248+","Challenges"],["64","Institutes"],["41","Industry Partners"],["93","Solutions Implemented"],["2.4L+","Lives Impacted"]].map(([v,l])=><div key={l} className="min-[440px]:last:col-span-2 lg:last:col-span-1"><p className="impact-gradient-text text-2xl font-semibold lg:text-3xl">{v}</p><p className="mt-1 text-sm text-slate-500">{l}</p></div>)}</div>
+    <section className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 md:py-16 lg:px-10 xl:px-12">
+      <div className="mb-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Live Impact</p>
+        <div className="grid gap-6 min-[440px]:grid-cols-2 lg:grid-cols-5">{[["1,248+","Challenges"],["64","Institutes"],["41","Industry Partners"],["93","Solutions Implemented"],["2.4L+","Lives Impacted"]].map(([v,l])=><div key={l} className="border-slate-200 min-[440px]:last:col-span-2 lg:border-r lg:pr-6 lg:last:col-span-1 lg:last:border-r-0"><p className="impact-gradient-text text-3xl font-semibold lg:text-4xl">{v}</p><p className="mt-2 text-sm text-slate-500">{l}</p></div>)}</div>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">{kpis.map(([t,v,n],i)=><KPICard key={t} title={t} value={v} note={n} icon={icons[i]}/>)}</div>
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <ChartCard title="Challenges by Category"><ResponsiveContainer><BarChart data={chartData.category}><XAxis dataKey="name" hide/><YAxis/><Tooltip/><Bar dataKey="value" fill="#38BDF8" radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></ChartCard>
-        <ChartCard title="Monthly Challenge Submissions"><ResponsiveContainer><LineChart data={chartData.monthly}><XAxis dataKey="month"/><YAxis/><Tooltip/><Line dataKey="submissions" stroke="#38BDF8" strokeWidth={3}/><Line dataKey="resolved" stroke="#14B8A6" strokeWidth={3}/></LineChart></ResponsiveContainer></ChartCard>
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">{kpis.map(([t,v,n],i)=><KPICard key={t} title={t} value={v} note={n} icon={icons[i]}/>)}</div>
+      <div className="mt-12 grid gap-8 xl:grid-cols-2">
+        <ChartCard title="Challenges by Category"><ResponsiveContainer><BarChart data={chartData.category}><XAxis dataKey="name" hide/><YAxis/><Tooltip/><Bar dataKey="value" fill="#2563EB" radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="Monthly Challenge Submissions"><ResponsiveContainer><LineChart data={chartData.monthly}><XAxis dataKey="month"/><YAxis/><Tooltip/><Line dataKey="submissions" stroke="#2563EB" strokeWidth={3}/><Line dataKey="resolved" stroke="#0D9488" strokeWidth={3}/></LineChart></ResponsiveContainer></ChartCard>
         <ChartCard title="Challenge Status Distribution"><ResponsiveContainer><PieChart><Pie data={chartData.status} dataKey="value" nameKey="name" innerRadius={62} outerRadius={98}>{chartData.status.map((_,i)=><Cell key={i} fill={colors[i%colors.length]}/>)}</Pie><Tooltip/></PieChart></ResponsiveContainer></ChartCard>
-        <ChartCard title="Challenges by District"><ResponsiveContainer><BarChart data={chartData.district} layout="vertical" margin={{ left: 30 }}><XAxis type="number"/><YAxis dataKey="name" type="category"/><Tooltip/><Bar dataKey="challenges" fill="#14B8A6" radius={[0,6,6,0]}/></BarChart></ResponsiveContainer></ChartCard>
-        <ChartCard title="University vs Industry Participation"><ResponsiveContainer><BarChart data={chartData.participation}><XAxis dataKey="name"/><YAxis/><Tooltip/><Bar dataKey="institutes" fill="#38BDF8"/><Bar dataKey="industries" fill="#8B5CF6"/></BarChart></ResponsiveContainer></ChartCard>
-        <ChartCard title="Impact by Sector"><ResponsiveContainer><RadarChart data={chartData.impact}><PolarGrid/><PolarAngleAxis dataKey="sector"/><Radar dataKey="impact" fill="#F59E0B" fillOpacity={0.35} stroke="#F59E0B"/></RadarChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="Challenges by District"><ResponsiveContainer><BarChart data={chartData.district} layout="vertical" margin={{ left: 30 }}><XAxis type="number"/><YAxis dataKey="name" type="category"/><Tooltip/><Bar dataKey="challenges" fill="#0D9488" radius={[0,6,6,0]}/></BarChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="University vs Industry Participation"><ResponsiveContainer><BarChart data={chartData.participation}><XAxis dataKey="name"/><YAxis/><Tooltip/><Bar dataKey="institutes" fill="#2563EB"/><Bar dataKey="industries" fill="#7C3AED"/></BarChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="Impact by Sector"><ResponsiveContainer><RadarChart data={chartData.impact}><PolarGrid/><PolarAngleAxis dataKey="sector"/><Radar dataKey="impact" fill="#D97706" fillOpacity={0.25} stroke="#D97706"/></RadarChart></ResponsiveContainer></ChartCard>
       </div>
-      <Section title="Recent Challenges"><div className="grid gap-4 lg:grid-cols-3">{challenges.slice(0,3).map(c=><ChallengeCard key={c.id} challenge={c}/>)}</div></Section>
-      <Section title="Featured Solutions"><div className="grid gap-4 lg:grid-cols-3">{projects.slice(0,3).map(p=><ProjectCard key={p.id} project={p}/>)}</div></Section>
-      <Section title="Top Performing Institutes"><div className="grid gap-4 lg:grid-cols-3">{institutes.slice(0,3).map(i=><InstituteCard key={i.name} institute={i}/>)}</div></Section>
-      <Section title="Industry Collaboration Highlights"><div className="grid gap-4 lg:grid-cols-4">{industries.map(i=><IndustryCard key={i.name} industry={i}/>)}</div></Section>
-      <Section title="District-wise Impact Map"><div className="grid min-h-72 place-items-center rounded-xl border bg-white p-6 text-center shadow-sm"><div><Map className="mx-auto mb-3 text-green" size={48}/><h3 className="text-2xl font-bold text-navy">Jharkhand Impact Coverage</h3><p className="mt-2 text-slate-600">Interactive district heat map placeholder showing pilots, beneficiaries and challenge density across 24 districts.</p></div></div></Section>
+      <Section title="Recent Challenges"><div className="grid gap-6 lg:grid-cols-3">{challenges.slice(0,3).map(c=><ChallengeCard key={c.id} challenge={c}/>)}</div></Section>
+      <Section title="Featured Solutions"><div className="grid gap-6 lg:grid-cols-3">{projects.slice(0,3).map(p=><ProjectCard key={p.id} project={p}/>)}</div></Section>
+      <Section title="Top Performing Institutes"><div className="grid gap-6 lg:grid-cols-3">{institutes.slice(0,3).map(i=><InstituteCard key={i.name} institute={i}/>)}</div></Section>
+      <Section title="Industry Collaboration Highlights"><div className="grid gap-6 lg:grid-cols-4">{industries.map(i=><IndustryCard key={i.name} industry={i}/>)}</div></Section>
+      <Section title="District-wise Impact Map"><div className="grid min-h-80 place-items-center rounded-3xl border bg-white p-8 text-center shadow-sm"><div><Map className="mx-auto mb-4 text-green" size={52}/><h3 className="text-2xl font-semibold text-navy">Jharkhand Impact Coverage</h3><p className="mt-3 max-w-2xl text-slate-600">Interactive district heat map placeholder showing pilots, beneficiaries and challenge density across 24 districts.</p></div></div></Section>
     </section>
   </div>;
 }
-function Section({ title, children }) { return <section className="mt-10"><h2 className="mb-4 text-2xl font-bold text-navy">{title}</h2>{children}</section>; }
+function Section({ title, children }) { return <section className="mt-14 md:mt-16"><h2 className="mb-6 text-2xl font-semibold text-navy md:text-3xl">{title}</h2>{children}</section>; }
