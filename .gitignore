@@ -18,6 +18,8 @@ backend/.venv/
 backend/venv/
 backend/vector_store/*.index
 backend/vector_store/*.faiss
+backend/vector_store/*.json
+!backend/vector_store/.gitkeep
 
 .DS_Store
 .idea/

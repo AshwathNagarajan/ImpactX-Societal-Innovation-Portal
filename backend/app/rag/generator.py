@@ -39,10 +39,13 @@ async def generate_structured_analysis(challenge: Dict[str, Any], context: List[
     prompt = build_prompt(challenge, context)
     headers = {"Authorization": f"Bearer {settings.huggingface_token}"}
     url = f"https://api-inference.huggingface.co/models/{settings.hf_generation_model}"
-    async with httpx.AsyncClient(timeout=60) as client:
-        response = await client.post(url, headers=headers, json={"inputs": prompt, "parameters": {"max_new_tokens": 700}})
-        response.raise_for_status()
-        payload = response.json()
+    try:
+        async with httpx.AsyncClient(timeout=60) as client:
+            response = await client.post(url, headers=headers, json={"inputs": prompt, "parameters": {"max_new_tokens": 700}})
+            response.raise_for_status()
+            payload = response.json()
+    except httpx.HTTPError:
+        return fallback_generation(challenge, context)
 
     text = payload[0].get("generated_text", "") if isinstance(payload, list) else str(payload)
     try:

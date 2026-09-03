@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 from typing import Iterable, List
 
@@ -6,6 +7,8 @@ from app.core.config import settings
 
 @lru_cache
 def get_embedding_model():
+    os.environ.setdefault("USE_TF", "0")
+    os.environ.setdefault("TRANSFORMERS_NO_TF", "1")
     from sentence_transformers import SentenceTransformer
 
     return SentenceTransformer(settings.hf_embedding_model)
