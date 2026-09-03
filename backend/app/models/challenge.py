@@ -1,0 +1,22 @@
+from enum import StrEnum
+
+
+class ChallengeStatus(StrEnum):
+    SUBMITTED = "SUBMITTED"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    VALIDATED = "VALIDATED"
+    ASSIGNED = "ASSIGNED"
+    IN_DEVELOPMENT = "IN_DEVELOPMENT"
+    PILOT_TESTING = "PILOT_TESTING"
+    IMPLEMENTED = "IMPLEMENTED"
+    REJECTED = "REJECTED"
+
+
+class PriorityLevel(StrEnum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
+
+
+CHALLENGE_COLLECTION = "challenges"

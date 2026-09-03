@@ -1,0 +1,1 @@
+PARTNERSHIP_COLLECTION = "partnerships"

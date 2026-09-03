@@ -1,0 +1,1 @@
+INDUSTRY_COLLECTION = "industries"

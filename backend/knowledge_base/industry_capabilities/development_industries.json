@@ -1,0 +1,23 @@
+[
+  {
+    "company": "Industry A - Civic Cloud Labs",
+    "type": "industry_capability",
+    "capabilities": ["Cloud", "AI", "Data Analytics", "Model Hosting", "Dashboards"],
+    "support_types": ["Cloud Credits", "Technical Mentorship"],
+    "csr_domains": ["Education", "Agriculture", "Health"]
+  },
+  {
+    "company": "Industry B - SensorWorks India",
+    "type": "industry_capability",
+    "capabilities": ["IoT", "Sensors", "Hardware Prototyping", "LoRa", "Embedded Boards"],
+    "support_types": ["Equipment", "Prototype Support", "Pilot Support"],
+    "csr_domains": ["Water", "Disaster Management"]
+  },
+  {
+    "company": "Industry C - Social Impact Manufacturing",
+    "type": "industry_capability",
+    "capabilities": ["Manufacturing", "Pilot Deployment", "CSR Funding", "Market Access"],
+    "support_types": ["Manufacturing", "Funding", "Market Access"],
+    "csr_domains": ["Livelihood", "Accessibility"]
+  }
+]

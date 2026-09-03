@@ -1,0 +1,26 @@
+[
+  {
+    "institution": "Institute A - AI Agriculture Lab",
+    "type": "university_expertise",
+    "departments": ["Computer Science", "AI & Data Science", "Biotechnology"],
+    "expertise": ["AI", "Data Science", "Computer Vision", "Agriculture Technology"],
+    "previous_projects": ["Leaf image disease classifier", "Farmer advisory chatbot"],
+    "category": "Agriculture"
+  },
+  {
+    "institution": "Institute B - Water and Environment Center",
+    "type": "university_expertise",
+    "departments": ["Civil Engineering", "Environmental Engineering"],
+    "expertise": ["Water Management", "Sanitation", "Environmental Monitoring"],
+    "previous_projects": ["Low-cost leak detection", "Water testing kits"],
+    "category": "Water & Sanitation"
+  },
+  {
+    "institution": "Institute C - Embedded Systems Lab",
+    "type": "university_expertise",
+    "departments": ["Electronics", "IoT", "Mechanical"],
+    "expertise": ["Embedded Systems", "IoT", "Disaster Monitoring", "Sensors"],
+    "previous_projects": ["River-level alert node", "Solar telemetry station"],
+    "category": "Disaster Management"
+  }
+]

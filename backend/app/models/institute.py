@@ -1,0 +1,1 @@
+INSTITUTE_COLLECTION = "institutes"

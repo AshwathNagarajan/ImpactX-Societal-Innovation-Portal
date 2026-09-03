@@ -1,0 +1,14 @@
+from enum import StrEnum
+
+
+class ProjectStatus(StrEnum):
+    ASSIGNED = "ASSIGNED"
+    RESEARCH = "RESEARCH"
+    PROTOTYPE = "PROTOTYPE"
+    TESTING = "TESTING"
+    PILOT = "PILOT"
+    IMPLEMENTATION = "IMPLEMENTATION"
+    COMPLETED = "COMPLETED"
+
+
+PROJECT_COLLECTION = "projects"
