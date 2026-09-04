@@ -15,12 +15,18 @@ export function login(email, password, role) {
   return { ok: false, error: "Invalid demo credentials for the selected role." };
 }
 
+export function saveUser(user) {
+  const role = String(user.role || "").toLowerCase();
+  localStorage.setItem(KEY, JSON.stringify({ email: user.email, name: user.name, role, id: user.id }));
+}
+
 export function getUser() {
   try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; }
 }
 
 export function logout() {
   localStorage.removeItem(KEY);
+  localStorage.removeItem("impactx_access_token");
 }
 
 export function rolePath(role) {

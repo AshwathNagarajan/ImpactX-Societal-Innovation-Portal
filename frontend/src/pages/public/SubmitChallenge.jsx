@@ -1,29 +1,49 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { categories, districts } from "../../data/mockData.js";
+import { categories, districts } from "../../data/referenceData.js";
 import Modal from "../../components/common/Modal.jsx";
+import { challengeService } from "../../services/challengeService.js";
 export default function SubmitChallenge() {
   const navigate = useNavigate();
   const [modal, setModal] = useState(null);
-  const [form, setForm] = useState({ name:"", email:"", phone:"", type:"Citizen", title:"", description:"", category:"Agriculture", subCategory:"", district:"Ranchi", city:"", location:"", priority:"Medium", attempts:"", affected:"", impact:"", consent:false });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({ title:"", description:"", category:"Agriculture", subCategory:"", district:"Ranchi", city:"", location:"", priority:"Medium", attempts:"", affected:"", impact:"", consent:false });
   const set = (k,v)=>setForm(f=>({...f,[k]:v}));
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    const list = JSON.parse(localStorage.getItem("impactx_submissions") || "[]");
-    const id = `IMPX-2026-${String(12 + list.length + 1).padStart(4,"0")}`;
-    const row = { id, title: form.title, category: form.category, subCategory: form.subCategory, district: form.district, city: form.city, date: new Date().toISOString().slice(0,10), status: "Submitted", priority: form.priority, affected: Number(form.affected || 0), institutes: 0, industries: 0, submitter: `${form.name}, ${form.type}`, description: form.description, progress: 5 };
-    localStorage.setItem("impactx_submissions", JSON.stringify([...list, row]));
-    setModal(id);
+    setBusy(true);
+    setError("");
+    try {
+      const response = await challengeService.create({
+        submitted_by: { name: "Anonymous Citizen", email: "anonymous@impactx.in", phone: "", type: "Citizen" },
+        title: form.title,
+        description: form.description,
+        category: form.category,
+        subcategory: form.subCategory,
+        district: form.district,
+        city_or_village: form.city,
+        location: form.location,
+        urgency: form.priority.toUpperCase(),
+        people_affected: Number(form.affected || 0),
+        existing_attempts: form.attempts,
+        expected_impact: form.impact,
+        attachments: [],
+      });
+      setModal(response.challenge_id);
+    } catch (err) {
+      setError(err?.response?.data?.message || err?.response?.data?.detail || "Unable to submit challenge. Please check the form and try again.");
+    } finally {
+      setBusy(false);
+    }
   };
-  const steps = ["Basic Information","Problem Details","Location","Evidence","Impact","Contact","Review"];
   return <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 md:py-12 lg:px-10 xl:px-0"><span className="rounded-full border border-blue/20 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue sm:text-sm">Citizen Submission</span><h1 className="mt-5 text-3xl font-semibold tracking-tight text-navy sm:text-4xl">Submit a Societal Challenge</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">No login required. Your submission enters AI analysis and government validation.</p>
-    <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-7">{steps.map((s,i)=><div key={s} className="flex items-center gap-3 rounded-2xl border bg-white px-4 py-3 shadow-sm"><span className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-[11px] font-semibold ${i===0?"impact-gradient text-white":"bg-slate-100 text-slate-500"}`}>{String(i+1).padStart(2,"0")}</span><span className="min-w-0 text-xs font-medium leading-4 text-navy lg:text-sm">{s}</span></div>)}</div>
     <form onSubmit={submit} className="mt-8 space-y-8">
-      <Panel title="Personal Information"><Input label="Name" v={form.name} on={v=>set("name",v)} required/><Input label="Email" type="email" v={form.email} on={v=>set("email",v)} required/><Input label="Phone" v={form.phone} on={v=>set("phone",v)}/><Select label="Citizen Type" v={form.type} on={v=>set("type",v)} opts={["Citizen","NGO","Community Group","Other"]}/></Panel>
       <Panel title="Challenge Information"><Input label="Challenge Title" v={form.title} on={v=>set("title",v)} required/><Text label="Description" v={form.description} on={v=>set("description",v)} required/><Select label="Category" v={form.category} on={v=>set("category",v)} opts={categories}/><Input label="Sub-category" v={form.subCategory} on={v=>set("subCategory",v)}/><Select label="District" v={form.district} on={v=>set("district",v)} opts={districts}/><Input label="City / Village" v={form.city} on={v=>set("city",v)}/><Input label="Exact location text" v={form.location} on={v=>set("location",v)}/><Select label="Urgency level" v={form.priority} on={v=>set("priority",v)} opts={["Low","Medium","High","Critical"]}/></Panel>
       <Panel title="Supporting Information"><Upload label="Upload image placeholder"/><Upload label="Upload video placeholder"/><Upload label="Upload document placeholder"/><Text label="Existing attempts to solve the problem" v={form.attempts} on={v=>set("attempts",v)}/><Input label="Number of people affected" type="number" v={form.affected} on={v=>set("affected",v)} required/><Text label="Expected impact" v={form.impact} on={v=>set("impact",v)}/></Panel>
       <label className="flex gap-3 rounded-2xl border bg-white p-5 text-sm shadow-sm"><input type="checkbox" required checked={form.consent} onChange={e=>set("consent",e.target.checked)}/> I confirm that the information provided is accurate.</label>
-      <button className="impact-gradient min-h-11 rounded-xl px-6 py-3 font-semibold text-white shadow-sm">Submit Challenge</button>
+      {error&&<p className="rounded-2xl bg-red-50 p-4 text-sm font-semibold text-red-600">{error}</p>}
+      <button disabled={busy} className="impact-gradient min-h-11 rounded-xl px-6 py-3 font-semibold text-white shadow-sm disabled:opacity-60">{busy?"Submitting...":"Submit Challenge"}</button>
     </form>
     <Modal open={!!modal} title="Challenge submitted" onClose={()=>navigate(`/challenges/${modal}`)}><p className="text-slate-600">Your challenge ID is <strong className="text-navy">{modal}</strong>. The mock AI review has been queued.</p><button onClick={()=>navigate(`/challenges/${modal}`)} className="mt-5 rounded-xl bg-blue px-5 py-3 font-semibold text-white">View Challenge Details</button></Modal>
   </div>;

@@ -39,4 +39,4 @@ async def support_project(project_id: str, user=Depends(require_industry)):
 
 @router.put("/partnerships/{partnership_id}")
 async def update_partnership(partnership_id: str, payload: dict, user=Depends(require_industry)):
-    return {"success": True, "message": "Partnership update endpoint ready.", "partnership_id": partnership_id, "data": payload}
+    return {"success": True, "message": "Partnership updated successfully.", "data": await industry_service.update_partnership(partnership_id, payload, user)}

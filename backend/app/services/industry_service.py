@@ -55,3 +55,19 @@ async def support_project(project_id: str, user: dict) -> dict:
         {"$addToSet": {"industry_ids": user["id"]}, "$set": {"updated_at": utc_now()}},
     )
     return {"success": True, "message": "Industry support registered."}
+
+
+async def update_partnership(partnership_id: str, payload: dict, user: dict) -> dict:
+    from bson import ObjectId
+    from pymongo import ReturnDocument
+    from app.utils.mongo import not_found
+
+    allowed = {"support_type", "contribution", "mentor_name", "timeline", "notes", "status"}
+    updates = {key: value for key, value in payload.items() if key in allowed}
+    updates["updated_at"] = utc_now()
+    updates["updated_by"] = user["id"]
+    query = {"_id": ObjectId(partnership_id)} if ObjectId.is_valid(partnership_id) else {"partnership_id": partnership_id}
+    result = await get_database().partnerships.find_one_and_update(query, {"$set": updates}, return_document=ReturnDocument.AFTER)
+    if not result:
+        not_found("Partnership not found")
+    return serialize_document(result)

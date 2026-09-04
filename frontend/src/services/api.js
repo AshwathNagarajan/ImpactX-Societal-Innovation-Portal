@@ -12,4 +12,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    if (status === 401) {
+      localStorage.removeItem("impactx_access_token");
+      localStorage.removeItem("impactx_user");
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

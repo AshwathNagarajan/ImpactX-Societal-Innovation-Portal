@@ -49,9 +49,9 @@ async def projects(user=Depends(require_institute)):
 
 @router.post("/teams")
 async def create_team(payload: dict, user=Depends(require_institute)):
-    return {"success": True, "message": "Team creation endpoint ready.", "data": payload}
+    return {"success": True, "message": "Team created successfully.", "data": await institute_service.create_team(payload, user)}
 
 
 @router.put("/milestones/{milestone_id}")
 async def update_milestone(milestone_id: str, payload: dict, user=Depends(require_institute)):
-    return {"success": True, "message": "Milestone update endpoint ready.", "milestone_id": milestone_id, "data": payload}
+    return {"success": True, "message": "Milestone updated successfully.", "data": await institute_service.update_milestone(milestone_id, payload, user)}

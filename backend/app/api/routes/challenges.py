@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 
+from app.core.dependencies import require_admin
 from app.schemas.challenge import ChallengeCreate, ChallengeListResponse
 from app.services import challenge_service
 
@@ -32,3 +33,13 @@ async def list_challenges(
 @router.get("/{challenge_id}")
 async def get_challenge(challenge_id: str):
     return {"success": True, "data": await challenge_service.get_challenge_by_id(challenge_id)}
+
+
+@router.put("/{challenge_id}", dependencies=[Depends(require_admin)])
+async def update_challenge(challenge_id: str, payload: dict):
+    return {"success": True, "message": "Challenge updated successfully.", "data": await challenge_service.update_challenge(challenge_id, payload)}
+
+
+@router.delete("/{challenge_id}", dependencies=[Depends(require_admin)])
+async def delete_challenge(challenge_id: str):
+    return {"success": True, "message": "Challenge deleted successfully.", "data": await challenge_service.delete_challenge(challenge_id)}

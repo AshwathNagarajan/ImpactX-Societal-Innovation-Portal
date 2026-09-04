@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { categories, districts, priorities, statuses } from "../../data/mockData.js";
+import { categories, districts, priorities, statuses } from "../../data/referenceData.js";
 export default function SearchFilter({ filters, setFilters }) {
   const update = (key, value) => setFilters((f) => ({ ...f, [key]: value }));
   return <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm backdrop-blur md:p-6">

@@ -49,12 +49,12 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.get("/")
 async def root():
-    return {"status": "healthy", "service": "IMPACTX API"}
+    return {"status": "healthy", "service": "IMPACTX API", "environment": settings.app_env}
 
 
 @app.get("/api/health")
 async def health():
-    return {"status": "healthy", "service": "IMPACTX API"}
+    return {"status": "healthy", "service": "IMPACTX API", "environment": settings.app_env}
 
 
 app.include_router(api_router)

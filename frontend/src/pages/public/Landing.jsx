@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, LineChart, Line, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar } from "recharts";
 import { Award, Building2, Factory, Lightbulb, Map, ShieldCheck, Users, Workflow } from "lucide-react";
-import { chartData, challenges, industries, institutes, kpis, projects } from "../../data/mockData.js";
+import { useImpactData } from "../../hooks/useImpactData.js";
 import KPICard from "../../components/dashboard/KPICard.jsx";
 import ChartCard from "../../components/charts/ChartCard.jsx";
 import ChallengeCard from "../../components/challenges/ChallengeCard.jsx";
@@ -10,7 +10,10 @@ import InstituteCard from "../../components/dashboard/InstituteCard.jsx";
 import IndustryCard from "../../components/dashboard/IndustryCard.jsx";
 const colors = ["#2563EB", "#0891B2", "#0D9488", "#7C3AED", "#16A34A", "#D97706", "#64748B"];
 const icons = [Workflow, ShieldCheck, Lightbulb, Award, Building2, Factory, Map, Users];
+const networkNodes = ["Citizen","AI Analysis","Government","University","Industry","Impact"];
 export default function Landing() {
+  const { data } = useImpactData();
+  const { chartData, challenges, industries, institutes, kpis, projects } = data;
   return <div>
     <section className="border-b border-slate-200 bg-white">
       <div className="mx-auto grid max-w-[1440px] items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:min-h-[70vh] lg:grid-cols-[1.04fr_.96fr] lg:px-10 xl:px-12">
@@ -34,14 +37,19 @@ export default function Landing() {
         <div className="premium-surface relative hidden min-h-[500px] overflow-hidden rounded-3xl border p-10 md:block">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(37,99,235,.10),transparent_35%)]"/>
           <div className="relative grid h-full place-items-center">
-            <div className="relative h-56 w-56 min-[420px]:h-64 min-[420px]:w-64 lg:h-80 lg:w-80">
-              {["Citizen","AI Analysis","Government","University","Industry","Impact"].map((n,i)=> {
-                const pos = [[38,0],[67,18],[67,60],[38,78],[8,60],[8,18]][i];
-                return <div key={n} className="absolute w-20 rounded-xl border border-blue/20 bg-white/95 p-2 text-center text-[11px] font-semibold text-navy shadow-lg min-[420px]:w-24 lg:w-28 lg:rounded-2xl lg:p-3 lg:text-sm" style={{left:`${pos[0]}%`,top:`${pos[1]}%`}}><span className="mx-auto mb-1.5 block h-2 w-2 rounded-full bg-blue"/>{n}</div>
-              })}
-              <div className="absolute left-1/2 top-1/2 grid h-18 w-18 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-blue/20 bg-white text-center text-[11px] font-semibold text-blue shadow-lg lg:h-24 lg:w-24 lg:text-sm">IMPACTX<br/>Network</div>
-              <div className="absolute inset-10 rounded-full border border-slate-500/10"/>
-              <div className="absolute inset-20 rounded-full border border-teal-400/10"/>
+            <div className="impactx-orbit relative h-72 w-72 lg:h-80 lg:w-80">
+              <div className="impactx-orbit-ring absolute inset-6 rounded-full border border-slate-500/10"/>
+              <div className="absolute inset-14 rounded-full border border-teal-400/10"/>
+              <div className="impactx-orbit-shell absolute inset-0">
+                {networkNodes.map((n,i)=> (
+                  <div key={n} className="impactx-orbit-node" style={{"--orbit-angle": `${i * 60}deg`}}>
+                    <div className="impactx-orbit-label w-24 rounded-2xl border border-blue/20 bg-white/95 p-3 text-center text-xs font-semibold text-navy shadow-lg lg:w-28 lg:text-sm">
+                      <span className="mx-auto mb-1.5 block h-2 w-2 rounded-full bg-blue"/>{n}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="absolute left-1/2 top-1/2 z-10 grid h-24 w-24 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-blue/20 bg-white text-center text-sm font-semibold text-blue shadow-lg">IMPACTX<br/>Network</div>
             </div>
           </div>
         </div>
@@ -50,7 +58,7 @@ export default function Landing() {
     <section className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 md:py-16 lg:px-10 xl:px-12">
       <div className="mb-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
         <p className="mb-6 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Live Impact</p>
-        <div className="grid gap-6 min-[440px]:grid-cols-2 lg:grid-cols-5">{[["1,248+","Challenges"],["64","Institutes"],["41","Industry Partners"],["93","Solutions Implemented"],["2.4L+","Lives Impacted"]].map(([v,l])=><div key={l} className="border-slate-200 min-[440px]:last:col-span-2 lg:border-r lg:pr-6 lg:last:col-span-1 lg:last:border-r-0"><p className="impact-gradient-text text-3xl font-semibold lg:text-4xl">{v}</p><p className="mt-2 text-sm text-slate-500">{l}</p></div>)}</div>
+        <div className="grid gap-6 min-[440px]:grid-cols-2 lg:grid-cols-5">{kpis.slice(0,5).map(([l,v])=><div key={l} className="border-slate-200 min-[440px]:last:col-span-2 lg:border-r lg:pr-6 lg:last:col-span-1 lg:last:border-r-0"><p className="impact-gradient-text text-3xl font-semibold lg:text-4xl">{v}</p><p className="mt-2 text-sm text-slate-500">{l}</p></div>)}</div>
       </div>
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">{kpis.map(([t,v,n],i)=><KPICard key={t} title={t} value={v} note={n} icon={icons[i]}/>)}</div>
       <div className="mt-12 grid gap-8 xl:grid-cols-2">

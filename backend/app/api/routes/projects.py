@@ -12,9 +12,19 @@ async def list_projects(user=Depends(get_current_user)):
     return {"success": True, "items": await project_service.list_projects()}
 
 
+@router.get("/{project_id}")
+async def get_project(project_id: str, user=Depends(get_current_user)):
+    return {"success": True, "data": await project_service.get_project(project_id)}
+
+
 @router.post("")
 async def create_project(payload: ProjectCreate, user=Depends(get_current_user)):
     return {"success": True, "data": await project_service.create_project(payload)}
+
+
+@router.put("/{project_id}")
+async def update_project(project_id: str, payload: dict, user=Depends(get_current_user)):
+    return {"success": True, "message": "Project updated successfully.", "data": await project_service.update_project(project_id, payload)}
 
 
 @router.post("/{project_id}/transition")

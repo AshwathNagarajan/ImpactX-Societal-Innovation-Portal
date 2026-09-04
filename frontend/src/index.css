@@ -97,6 +97,43 @@ td { color: #334155; }
 }
 .recharts-tooltip-label, .recharts-tooltip-item { color: #0f172a !important; }
 
+.impactx-orbit {
+  --orbit-radius: clamp(104px, 12vw, 142px);
+}
+.impactx-orbit-shell {
+  animation: impactx-orbit 24s linear infinite;
+  transform-origin: 50% 50%;
+}
+.impactx-orbit-ring {
+  box-shadow: 0 0 48px rgba(37, 99, 235, .08);
+}
+.impactx-orbit-node {
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: rotate(var(--orbit-angle)) translateX(var(--orbit-radius)) rotate(calc(-1 * var(--orbit-angle)));
+  transform-origin: 0 0;
+}
+.impactx-orbit-label {
+  animation: impactx-counter-orbit 24s linear infinite;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes impactx-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes impactx-counter-orbit {
+  to { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .impactx-orbit-shell,
+  .impactx-orbit-label {
+    animation: none;
+  }
+}
+
 @media (max-width: 640px) {
   body { background-attachment: scroll; }
   .recharts-wrapper { font-size: 11px; }

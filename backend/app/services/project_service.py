@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from pymongo import ReturnDocument
 
 from app.ai.project_intelligence.lifecycle import lifecycle_steps, normalize_stage, validate_transition
 from app.core.database import get_database
@@ -37,6 +38,23 @@ async def create_project(payload: ProjectCreate) -> dict:
 async def list_projects() -> list[dict]:
     cursor = get_database().projects.find().sort("created_at", -1)
     return [serialize_document(item) async for item in cursor]
+
+
+async def get_project(project_id: str) -> dict:
+    project = await get_database().projects.find_one({"project_id": project_id})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return serialize_document(project)
+
+
+async def update_project(project_id: str, updates: dict) -> dict:
+    allowed = {"title", "team", "mentor", "proposal", "progress", "prototype_status", "pilot_status", "implementation_status", "impact_metrics"}
+    updates = {key: value for key, value in updates.items() if key in allowed}
+    updates["updated_at"] = utc_now()
+    result = await get_database().projects.find_one_and_update({"project_id": project_id}, {"$set": updates}, return_document=ReturnDocument.AFTER)
+    if not result:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return serialize_document(result)
 
 
 async def transition_project(project_id: str, payload: ProjectTransitionRequest, user: dict) -> dict:

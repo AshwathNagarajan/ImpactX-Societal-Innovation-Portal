@@ -3,12 +3,15 @@ import NextActionsCard from "../../components/ai/NextActionsCard.jsx";
 import ProjectHealthCard from "../../components/ai/ProjectHealthCard.jsx";
 import ProjectLifecycle from "../../components/ai/ProjectLifecycle.jsx";
 import ProgressBar from "../../components/common/ProgressBar.jsx";
-import { projects, teams } from "../../data/mockData.js";
+import { useImpactData } from "../../hooks/useImpactData.js";
 
 export default function ProjectPage() {
   const { id } = useParams();
-  const p = projects.find((x) => x.id === id) || projects[0];
-  const currentStage = p.stage?.toUpperCase?.().replaceAll(" ", "_") || "PROTOTYPE";
+  const { data } = useImpactData();
+  const p = data.projects.find((x) => x.id === id) || data.projects[0];
+  const team = data.teams[0] || { mentor: "Faculty mentor", departments: ["CSE", "AI & DS", "ECE"] };
+  if (!p) return <div className="rounded-2xl border bg-white p-6 shadow-sm">Loading database project...</div>;
+  const currentStage = (p.status || p.stage || "PROTOTYPE").toUpperCase?.().replaceAll(" ", "_");
 
   return (
     <div className="min-w-0 space-y-10">
@@ -40,7 +43,7 @@ export default function ProjectPage() {
         <section className="rounded-2xl border bg-white p-6 shadow-sm md:p-8">
           <h2 className="text-lg font-semibold text-navy md:text-xl">Team</h2>
           <p className="mt-3 text-sm leading-7 text-slate-600 md:text-base">
-            {teams[0].mentor}, 8 students from CSE, AI & DS, ECE, Civil and Mechanical departments.
+            {team.mentor}, 8 students from {(team.departments || []).join(", ")} departments.
           </p>
           <p className="mt-5 text-sm font-semibold text-purple">Industry mentor: Tata Steel Foundation product team</p>
         </section>

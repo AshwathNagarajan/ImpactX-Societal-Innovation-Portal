@@ -91,3 +91,21 @@ async def reject_challenge(challenge_id: str, user: dict) -> dict:
 async def projects(user: dict) -> list[dict]:
     cursor = get_database().projects.find({"institute_id": {"$in": [user["id"], ObjectId(user["id"]) if ObjectId.is_valid(user["id"]) else user["id"]]}})
     return [serialize_document(item) async for item in cursor]
+
+
+async def create_team(payload: dict, user: dict) -> dict:
+    document = {**payload, "created_by": user["id"], "created_at": utc_now(), "updated_at": utc_now()}
+    await get_database().teams.insert_one(document)
+    return serialize_document(document)
+
+
+async def update_milestone(milestone_id: str, payload: dict, user: dict) -> dict:
+    from pymongo import ReturnDocument
+    from app.utils.mongo import not_found
+
+    payload["updated_at"] = utc_now()
+    payload["updated_by"] = user["id"]
+    result = await get_database().milestones.find_one_and_update({"milestone_id": milestone_id}, {"$set": payload}, return_document=ReturnDocument.AFTER)
+    if not result:
+        not_found("Milestone not found")
+    return serialize_document(result)

@@ -7,6 +7,7 @@ from app.schemas.challenge import ChallengeCreate
 from app.utils.helpers import normalize_status, utc_now
 from app.utils.mongo import not_found
 from app.utils.serializers import serialize_document
+from app.services.notification_service import create_notification
 
 
 URGENCY_BASE = {"LOW": 20, "MEDIUM": 45, "HIGH": 68, "CRITICAL": 85}
@@ -71,6 +72,7 @@ async def create_challenge(payload: ChallengeCreate) -> dict:
         }
     )
     await get_database().challenges.insert_one(document)
+    await create_notification("New challenge submitted", document["title"], role="ADMIN", entity_type="challenge", entity_id=document["challenge_id"])
     return serialize_document(document)
 
 
@@ -103,6 +105,27 @@ async def get_challenge_by_id(challenge_id: str) -> dict:
 
 
 async def update_challenge(challenge_id: str, updates: Dict[str, Any]) -> dict:
+    allowed = {
+        "title",
+        "description",
+        "category",
+        "subcategory",
+        "district",
+        "city_or_village",
+        "location",
+        "urgency",
+        "people_affected",
+        "existing_attempts",
+        "expected_impact",
+        "attachments",
+        "status",
+        "priority",
+        "ai_analysis",
+        "matched_institutes",
+        "assigned_institute_id",
+        "industry_partners",
+    }
+    updates = {key: value for key, value in updates.items() if key in allowed}
     updates["updated_at"] = utc_now()
     result = await get_database().challenges.find_one_and_update(
         {"challenge_id": challenge_id},
@@ -120,7 +143,9 @@ async def pending_challenges() -> list[dict]:
 
 
 async def approve_challenge(challenge_id: str) -> dict:
-    return await update_challenge(challenge_id, {"status": "VALIDATED"})
+    item = await update_challenge(challenge_id, {"status": "VALIDATED"})
+    await create_notification("Challenge validated", item["title"], role="INSTITUTE", entity_type="challenge", entity_id=challenge_id)
+    return item
 
 
 async def reject_challenge(challenge_id: str) -> dict:
@@ -133,3 +158,16 @@ async def set_priority(challenge_id: str, priority: str) -> dict:
 
 async def assign_institute(challenge_id: str, institute_id: str) -> dict:
     return await update_challenge(challenge_id, {"assigned_institute_id": institute_id, "status": "ASSIGNED"})
+
+
+async def delete_challenge(challenge_id: str) -> dict:
+    database = get_database()
+    project = await database.projects.find_one({"challenge_id": challenge_id})
+    if project:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=409, detail="Challenge has linked projects and cannot be deleted.")
+    result = await database.challenges.delete_one({"challenge_id": challenge_id})
+    if result.deleted_count == 0:
+        not_found("Challenge not found")
+    return {"challenge_id": challenge_id, "deleted": True}

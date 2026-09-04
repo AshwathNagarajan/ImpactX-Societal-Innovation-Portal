@@ -10,6 +10,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
+    app_env: str = "development"
     mongodb_uri: str = ""
     mongodb_database: str = "impactx"
 
@@ -36,6 +37,10 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> List[str]:
         return [self.frontend_url, "http://localhost:5173", "http://127.0.0.1:5173"]
+
+    @property
+    def is_development(self) -> bool:
+        return self.app_env.lower() in {"dev", "development", "local"}
 
 
 @lru_cache
