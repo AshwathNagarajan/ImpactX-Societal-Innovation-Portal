@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+import { useState } from "react";
 import NextActionsCard from "../../components/ai/NextActionsCard.jsx";
 import ProjectHealthCard from "../../components/ai/ProjectHealthCard.jsx";
 import ProjectLifecycle from "../../components/ai/ProjectLifecycle.jsx";
@@ -8,7 +9,9 @@ import { useImpactData } from "../../hooks/useImpactData.js";
 export default function ProjectPage() {
   const { id } = useParams();
   const { data } = useImpactData();
-  const p = data.projects.find((x) => x.id === id) || data.projects[0];
+  const [updatedProject, setUpdatedProject] = useState(null);
+  const baseProject = data.projects.find((x) => x.id === id) || data.projects[0];
+  const p = updatedProject ? { ...baseProject, ...updatedProject, id: updatedProject.project_id || updatedProject.id } : baseProject;
   const team = data.teams[0] || { mentor: "Faculty mentor", departments: ["CSE", "AI & DS", "ECE"] };
   if (!p) return <div className="rounded-2xl border bg-white p-6 shadow-sm">Loading database project...</div>;
   const currentStage = (p.status || p.stage || "PROTOTYPE").toUpperCase?.().replaceAll(" ", "_");
@@ -23,7 +26,7 @@ export default function ProjectPage() {
         </p>
       </div>
 
-      <ProjectLifecycle current={currentStage} />
+      <ProjectLifecycle project={p} current={currentStage} onUpdated={setUpdatedProject} />
 
       <div className="grid gap-8 xl:grid-cols-[1.2fr_.8fr]">
         <section className="rounded-2xl border bg-white p-6 shadow-sm md:p-8">

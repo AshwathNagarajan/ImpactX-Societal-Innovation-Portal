@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any
 
 from app.core.database import get_database
+from app.ai.project_intelligence.lifecycle import current_stage_detail, lifecycle_steps, normalize_stage
 from app.utils.serializers import serialize_document
 
 
@@ -97,6 +98,8 @@ def project_ui(item: dict, institutes_by_id: dict[str, dict], challenges_by_id: 
     proposal = doc.get("proposal") or {}
     required_support = proposal.get("required_support") or doc.get("required_support") or ["Technical Mentorship"]
     technology = proposal.get("technology") or doc.get("technology") or ["Civic Technology"]
+    stage = normalize_stage(doc.get("status") or doc.get("stage"))
+    stage_detail = current_stage_detail(stage)
     return {
         **doc,
         "id": doc.get("project_id") or doc.get("id"),
@@ -107,6 +110,10 @@ def project_ui(item: dict, institutes_by_id: dict[str, dict], challenges_by_id: 
         "technology": technology[0] if isinstance(technology, list) else str(technology),
         "impact": int(doc.get("impact") or 78),
         "progress": int(doc.get("progress") or 0),
+        "stage": stage_detail["label"],
+        "status": stage,
+        "current_stage": stage_detail,
+        "lifecycle": lifecycle_steps(stage),
     }
 
 
