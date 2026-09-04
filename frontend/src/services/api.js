@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const defaultApiUrl = typeof window === "undefined"
+const defaultApiUrl = import.meta.env.DEV
   ? "http://localhost:8000/api"
-  : `${window.location.origin}/api`;
+  : "https://impactx-societal-innovation-portal.onrender.com/api";
 
 const api = axios.create({
   baseURL: import.meta.env.API_URL || defaultApiUrl,

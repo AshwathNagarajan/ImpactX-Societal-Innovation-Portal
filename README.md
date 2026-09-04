@@ -77,6 +77,8 @@ http://localhost:8000/docs
 
 Copy `backend/.env.example` to `backend/.env` and set your MongoDB Atlas URI and JWT secret.
 
+For Render, create a Web Service with `backend` as the root directory, use `pip install -r requirements.txt` as the build command, and use `python run.py` as the start command. Render provides the `PORT` environment variable; `run.py` binds to `0.0.0.0` and uses that port automatically. Set `APP_ENV=production` and set `FRONTEND_URL` to the deployed frontend URL.
+
 ## Demo Users
 
 Seed hashed demo accounts with:
