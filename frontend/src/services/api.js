@@ -1,7 +1,11 @@
 import axios from "axios";
 
+const defaultApiUrl = typeof window === "undefined"
+  ? "http://localhost:8000/api"
+  : `${window.location.origin}/api`;
+
 const api = axios.create({
-  baseURL: import.meta.env.API_URL || "http://localhost:8000/api",
+  baseURL: import.meta.env.API_URL || defaultApiUrl,
 });
 
 api.interceptors.request.use((config) => {
