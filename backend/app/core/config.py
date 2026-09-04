@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     hf_embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
     frontend_url: str = "http://localhost:5173"
+    cors_origins_csv: str = ""
     duplicate_high_threshold: float = 0.90
     duplicate_possible_threshold: float = 0.80
     vector_store_path: Path = Field(default=BACKEND_DIR / "vector_store")
@@ -36,7 +37,8 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> List[str]:
-        return [self.frontend_url, "http://localhost:5173", "http://127.0.0.1:5173"]
+        configured = [origin.strip() for origin in self.cors_origins_csv.split(",") if origin.strip()]
+        return list(dict.fromkeys([self.frontend_url, *configured, "http://localhost:5173", "http://127.0.0.1:5173"]))
 
     @property
     def is_development(self) -> bool:
