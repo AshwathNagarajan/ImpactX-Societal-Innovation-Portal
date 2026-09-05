@@ -5,7 +5,7 @@ import KPICard from "../../components/dashboard/KPICard.jsx";
 import ChartCard from "../../components/charts/ChartCard.jsx";
 
 const iconMap = [ClipboardList, Hourglass, CheckCircle, ListChecks, FolderKanban, Trophy, Building2, Factory];
-const neon = ["#94a3b8", "#64748b", "#475569", "#cbd5e1", "#e2e8f0"];
+const neon = ["#22d3ee", "#a78bfa", "#34d399", "#fbbf24", "#fb7185"];
 
 export default function AdminDashboard(){
   const { data } = useImpactData();
