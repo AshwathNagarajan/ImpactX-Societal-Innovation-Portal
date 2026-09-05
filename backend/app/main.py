@@ -54,7 +54,7 @@ async def root():
 
 @app.get("/api/health")
 async def health():
-    return {"app": "kec-coding-forum", "timestamp": "2026-09-04T08:00:14.208108253Z", "status": "UP"}
+    return {"status": "healthy", "service": "IMPACTX API", "environment": settings.app_env}
 
 
 app.include_router(api_router)

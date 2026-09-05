@@ -34,16 +34,16 @@ export default function Landing() {
             ))}
           </div>
         </div>
-        <div className="premium-surface relative hidden min-h-[500px] overflow-hidden rounded-3xl border p-10 md:block">
+        <div className="premium-surface relative hidden min-h-[500px] place-items-center overflow-hidden rounded-3xl border p-8 md:grid lg:min-h-[560px] lg:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(37,99,235,.10),transparent_35%)]"/>
-          <div className="relative grid h-full place-items-center">
-            <div className="impactx-orbit relative h-72 w-72 lg:h-80 lg:w-80">
+          <div className="relative grid w-full place-items-center">
+            <div className="impactx-orbit relative">
               <div className="impactx-orbit-ring absolute inset-6 rounded-full border border-slate-500/10"/>
               <div className="absolute inset-14 rounded-full border border-teal-400/10"/>
               <div className="impactx-orbit-shell absolute inset-0">
                 {networkNodes.map((n,i)=> (
                   <div key={n} className="impactx-orbit-node" style={{"--orbit-angle": `${i * 60}deg`}}>
-                    <div className="impactx-orbit-label w-24 rounded-2xl border border-blue/20 bg-white/95 p-3 text-center text-xs font-semibold text-navy shadow-lg lg:w-28 lg:text-sm">
+                    <div className="impactx-orbit-label w-24 rounded-2xl border border-blue/20 bg-white/95 p-3 text-center text-xs font-semibold text-navy shadow-lg xl:w-28 xl:text-sm">
                       <span className="mx-auto mb-1.5 block h-2 w-2 rounded-full bg-blue"/>{n}
                     </div>
                   </div>
@@ -62,11 +62,11 @@ export default function Landing() {
       </div>
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">{kpis.map(([t,v,n],i)=><KPICard key={t} title={t} value={v} note={n} icon={icons[i]}/>)}</div>
       <div className="mt-12 grid gap-8 xl:grid-cols-2">
-        <ChartCard title="Challenges by Category"><ResponsiveContainer><BarChart data={chartData.category}><XAxis dataKey="name" hide/><YAxis/><Tooltip/><Bar dataKey="value" fill="#2563EB" radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="Challenges by Category"><ResponsiveContainer><BarChart data={chartData.category}><XAxis dataKey="name" hide/><YAxis/><Tooltip/><Bar dataKey="value" fill="transparent" stroke="#22d3ee" strokeWidth={2} radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></ChartCard>
         <ChartCard title="Monthly Challenge Submissions"><ResponsiveContainer><LineChart data={chartData.monthly}><XAxis dataKey="month"/><YAxis/><Tooltip/><Line dataKey="submissions" stroke="#2563EB" strokeWidth={3}/><Line dataKey="resolved" stroke="#0D9488" strokeWidth={3}/></LineChart></ResponsiveContainer></ChartCard>
         <ChartCard title="Challenge Status Distribution"><ResponsiveContainer><PieChart><Pie data={chartData.status} dataKey="value" nameKey="name" innerRadius={62} outerRadius={98}>{chartData.status.map((_,i)=><Cell key={i} fill={colors[i%colors.length]}/>)}</Pie><Tooltip/></PieChart></ResponsiveContainer></ChartCard>
-        <ChartCard title="Challenges by District"><ResponsiveContainer><BarChart data={chartData.district} layout="vertical" margin={{ left: 30 }}><XAxis type="number"/><YAxis dataKey="name" type="category"/><Tooltip/><Bar dataKey="challenges" fill="#0D9488" radius={[0,6,6,0]}/></BarChart></ResponsiveContainer></ChartCard>
-        <ChartCard title="University vs Industry Participation"><ResponsiveContainer><BarChart data={chartData.participation}><XAxis dataKey="name"/><YAxis/><Tooltip/><Bar dataKey="institutes" fill="#2563EB"/><Bar dataKey="industries" fill="#7C3AED"/></BarChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="Challenges by District"><ResponsiveContainer><BarChart data={chartData.district} layout="vertical" margin={{ left: 30 }}><XAxis type="number"/><YAxis dataKey="name" type="category"/><Tooltip/><Bar dataKey="challenges" fill="transparent" stroke="#34d399" strokeWidth={2} radius={[0,6,6,0]}/></BarChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="University vs Industry Participation"><ResponsiveContainer><BarChart data={chartData.participation}><XAxis dataKey="name"/><YAxis/><Tooltip/><Bar dataKey="institutes" fill="transparent" stroke="#22d3ee" strokeWidth={2}/><Bar dataKey="industries" fill="transparent" stroke="#a78bfa" strokeWidth={2}/></BarChart></ResponsiveContainer></ChartCard>
         <ChartCard title="Impact by Sector"><ResponsiveContainer><RadarChart data={chartData.impact}><PolarGrid/><PolarAngleAxis dataKey="sector"/><Radar dataKey="impact" fill="#D97706" fillOpacity={0.25} stroke="#D97706"/></RadarChart></ResponsiveContainer></ChartCard>
       </div>
       <Section title="Recent Challenges"><div className="grid gap-6 lg:grid-cols-3">{challenges.slice(0,3).map(c=><ChallengeCard key={c.id} challenge={c}/>)}</div></Section>

@@ -26,7 +26,11 @@ export default function Login() {
       saveUser(res.user);
       navigate(rolePath(apiRole));
     } catch (err) {
-      setError(err?.response?.data?.message || err?.response?.data?.detail || "Unable to sign in with backend credentials.");
+      if (!err?.response) {
+        setError("Backend is not reachable. Start the API on port 8000 or check API_URL.");
+      } else {
+        setError(err?.response?.data?.message || err?.response?.data?.detail || "Unable to sign in with backend credentials.");
+      }
     } finally {
       setBusy(false);
     }

@@ -1,84 +1,123 @@
 import { useState } from "react";
 import ProjectLifecycle from "../../components/ai/ProjectLifecycle.jsx";
+import Modal from "../../components/common/Modal.jsx";
 import ProgressBar from "../../components/common/ProgressBar.jsx";
+import ProjectCard from "../../components/dashboard/ProjectCard.jsx";
 import { useImpactData } from "../../hooks/useImpactData.js";
 
-const lanes = [
-  ["PLANNING", "Challenge Intake"],
-  ["RESEARCH", "Research"],
-  ["SOLUTION_DESIGN", "Blueprint"],
-  ["PROTOTYPE", "Prototype"],
-  ["TESTING", "Testing"],
-  ["PILOT", "Pilot"],
-  ["IMPLEMENTATION", "Implementation"],
-  ["IMPACT_MONITORING", "Impact Review"],
-  ["COMPLETED", "Closed"],
-];
+const stageLabels = {
+  PLANNING: "Challenge Intake",
+  RESEARCH: "Research",
+  SOLUTION_DESIGN: "Blueprint",
+  PROTOTYPE: "Prototype",
+  TESTING: "Testing",
+  PILOT: "Pilot",
+  IMPLEMENTATION: "Implementation",
+  IMPACT_MONITORING: "Impact Review",
+  COMPLETED: "Closed",
+};
 
 export default function Projects() {
   const { data } = useImpactData();
   const [selectedId, setSelectedId] = useState("");
   const [edited, setEdited] = useState({});
   const projects = data.projects.map((project) => ({ ...project, ...(edited[project.id] || {}) }));
-  const selected = projects.find((project) => project.id === selectedId) || projects[0];
+  const selected = projects.find((project) => project.id === selectedId);
 
   const onUpdated = (project) => {
+    const id = project.project_id || project.id;
     setEdited((current) => ({
       ...current,
-      [project.project_id || project.id]: {
+      [id]: {
         ...project,
-        id: project.project_id || project.id,
-        stage: project.current_stage?.label || project.status,
+        id,
+        current_stage: project.current_stage,
+        lifecycle: project.lifecycle,
+        progress: project.progress,
+        status: project.status,
+        stage: project.current_stage?.label || stageLabels[project.status] || project.status,
       },
     }));
   };
 
   return (
     <div className="min-w-0 space-y-8">
-      <div>
-        <p className="text-sm font-semibold text-blue">Admin Operations</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-navy md:text-4xl">Project Lifecycle Tracking</h1>
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 md:text-base">
-          Monitor each innovation project from citizen challenge intake to measurable social impact, with stage ownership and database-backed progress actions.
-        </p>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-blue">Admin Operations</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-navy md:text-4xl">Project Lifecycle Tracking</h1>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 md:text-base">
+            Review each innovation project as a focused card. Open a project to inspect the complete lifecycle, stage owner, progress trail and available backend action.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
+          <span className="block text-2xl font-semibold text-blue">{projects.length}</span>
+          active project records
+        </div>
       </div>
 
-      {selected && <ProjectLifecycle project={selected} onUpdated={onUpdated} />}
-
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div className="mb-7 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-navy md:text-2xl">Lifecycle Board</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Projects are grouped by their saved backend lifecycle status.</p>
+            <h2 className="text-xl font-semibold text-navy md:text-2xl">Project Cards</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Click any project card to open the floating lifecycle tracker.</p>
           </div>
-          <p className="text-sm font-semibold text-slate-500">{projects.length} active records</p>
-        </div>
-
-        <div className="mt-7 overflow-x-auto pb-3">
-          <div className="grid min-w-[1180px] grid-cols-9 gap-4">
-            {lanes.map(([stage, label]) => (
-              <section key={stage} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                <div className="mb-4">
-                  <h3 className="text-sm font-semibold text-navy">{label}</h3>
-                  <p className="mt-1 text-xs text-slate-500">{projects.filter((project) => project.status === stage).length} projects</p>
-                </div>
-                <div className="space-y-3">
-                  {projects.filter((project) => project.status === stage).map((project) => (
-                    <button key={project.id} onClick={() => setSelectedId(project.id)} className={`w-full rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:border-blue/30 hover:shadow-md ${selected?.id === project.id ? "border-blue/40 ring-4 ring-blue/10" : "border-slate-200"}`}>
-                      <p className="line-clamp-3 text-sm font-semibold leading-5 text-navy">{project.title}</p>
-                      <p className="mt-2 text-xs text-slate-500">{project.university}</p>
-                      <div className="mt-4">
-                        <ProgressBar value={project.progress} />
-                      </div>
-                    </button>
-                  ))}
-                  {!projects.some((project) => project.status === stage) && <p className="rounded-xl border border-dashed border-slate-200 bg-white/60 p-3 text-xs leading-5 text-slate-400">No projects in this stage.</p>}
-                </div>
-              </section>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(stageLabels).slice(0, 5).map(([stage, label]) => (
+              <span key={stage} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500">
+                {projects.filter((project) => project.status === stage).length} {label}
+              </span>
             ))}
           </div>
         </div>
+
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              action={
+                <button onClick={() => setSelectedId(project.id)} className="mt-5 w-full rounded-xl border border-blue/30 bg-blue/10 px-4 py-3 text-sm font-semibold text-blue transition hover:bg-blue/15">
+                  Open tracking progress
+                </button>
+              }
+            />
+          ))}
+        </div>
       </section>
+
+      <Modal open={!!selected} title={selected ? `${selected.id} Tracking Progress` : "Tracking Progress"} onClose={() => setSelectedId("")} size="xl">
+        {selected && (
+          <div className="space-y-6">
+            <div className="rounded-2xl bg-slate-50 p-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{selected.university || "Partner Institute"}</p>
+              <h3 className="mt-2 text-2xl font-semibold leading-tight text-navy">{selected.title}</h3>
+              <div className="mt-5 grid gap-4 md:grid-cols-3">
+                <Info label="Stage" value={selected.current_stage?.label || selected.stage || stageLabels[selected.status] || selected.status} />
+                <Info label="Support" value={selected.support || "Technical Mentorship"} />
+                <Info label="Technology" value={selected.technology || "Civic Technology"} />
+              </div>
+              <div className="mt-5">
+                <div className="mb-2 flex items-center justify-between text-sm text-slate-600">
+                  <span className="font-semibold">Overall progress</span>
+                  <span>{selected.progress}%</span>
+                </div>
+                <ProgressBar value={selected.progress} />
+              </div>
+            </div>
+            <ProjectLifecycle project={selected} onUpdated={onUpdated} />
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+}
+
+function Info({ label, value }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-2 text-sm font-semibold text-navy">{value}</p>
     </div>
   );
 }
