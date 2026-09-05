@@ -23,7 +23,7 @@ export default function ChallengeDetails() {
     <section className="mt-8 rounded-3xl border bg-white p-6 shadow-sm md:p-8"><h2 className="mb-6 text-xl font-semibold text-navy md:text-2xl">Status Timeline</h2><Timeline steps={steps}/></section>
     <div className="mt-8 grid gap-8 lg:grid-cols-[.9fr_1.1fr]">
       <AIAnalysisCard analysis={c.ai_analysis || fallbackAnalysis(c)} compact />
-      <section className="min-w-0 rounded-3xl border bg-white p-6 shadow-sm md:p-8"><h2 className="text-xl font-semibold text-navy md:text-2xl">Impact Metrics</h2><ResponsiveContainer width="100%" height={280}><BarChart data={[{name:"Reach",value:c.affected},{name:"Households",value:Math.round(c.affected/4.8)},{name:"Pilot users",value:Math.round(c.affected*.18)}]}><XAxis dataKey="name"/><YAxis/><Tooltip/><Bar dataKey="value" fill="transparent" stroke="#22d3ee" strokeWidth={2} radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></section>
+      <section className="min-w-0 rounded-3xl border bg-white p-6 shadow-sm md:p-8"><h2 className="text-xl font-semibold text-navy md:text-2xl">Impact Metrics</h2><ResponsiveContainer width="100%" height={280}><BarChart data={[{name:"Reach",value:c.affected},{name:"Households",value:Math.round(c.affected/4.8)},{name:"Pilot users",value:Math.round(c.affected*.18)}]}><XAxis dataKey="name"/><YAxis/><Tooltip/><Bar dataKey="value" fill="transparent" stroke="#64748B" strokeWidth={2} radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></section>
     </div>
     <Grid title="Interested Institutes">{data.institutes.slice(0,3).map(i=><InstituteCard key={i.name} institute={i}/>)}</Grid>
     <Grid title="Interested Industries">{data.industries.slice(0,3).map(i=><IndustryCard key={i.name} industry={i}/>)}</Grid>

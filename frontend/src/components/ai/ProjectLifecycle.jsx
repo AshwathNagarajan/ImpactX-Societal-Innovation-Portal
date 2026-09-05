@@ -114,7 +114,7 @@ export default function ProjectLifecycle({ project, current = "PROTOTYPE", steps
               <textarea value={note} onChange={(event) => setNote(event.target.value)} rows="3" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue focus:ring-4 focus:ring-blue/10" placeholder="Add an optional lifecycle note for the audit trail" />
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 {roleActions.map((action) => (
-                  <button key={action.target_status} disabled={busy === action.target_status} onClick={() => runAction(action)} className="min-h-11 rounded-xl bg-gradient-to-r from-blue via-cyan to-teal px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-105 disabled:opacity-60">
+                  <button key={action.target_status} disabled={busy === action.target_status} onClick={() => runAction(action)} className="impact-gradient min-h-11 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-105 disabled:opacity-60">
                     {busy === action.target_status ? "Updating..." : action.label}
                   </button>
                 ))}

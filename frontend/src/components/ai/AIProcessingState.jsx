@@ -2,8 +2,8 @@ const steps = ["Analyzing challenge", "Classifying category", "Evaluating severi
 
 export default function AIProcessingState({ title = "AI analysis in progress" }) {
   return (
-    <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-6 shadow-sm">
-      <div className="h-2 w-24 animate-pulse rounded-full bg-gradient-to-r from-blue via-cyan to-teal" />
+    <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-zinc-50 p-6 shadow-sm">
+      <div className="impact-gradient h-2 w-24 animate-pulse rounded-full" />
       <h3 className="mt-5 text-lg font-semibold text-navy">{title}</h3>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {steps.map((step) => (
@@ -16,4 +16,3 @@ export default function AIProcessingState({ title = "AI analysis in progress" })
     </div>
   );
 }
-

@@ -11,9 +11,8 @@ export default function ProjectHealthCard({ health = {} }) {
         <strong className="impact-gradient-text text-4xl font-semibold">{score}</strong>
       </div>
       <div className="mt-5 h-2 rounded-full bg-slate-100">
-        <div className="h-full rounded-full bg-gradient-to-r from-blue via-cyan to-teal" style={{ width: `${Math.min(100, score)}%` }} />
+        <div className="impact-gradient h-full rounded-full" style={{ width: `${Math.min(100, score)}%` }} />
       </div>
     </section>
   );
 }
-

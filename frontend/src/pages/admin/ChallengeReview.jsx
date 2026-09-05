@@ -111,7 +111,7 @@ export default function ChallengeReview() {
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-navy md:text-4xl">Challenge Review</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 md:text-base">Review citizen evidence, AI analysis, duplicate signals and recommended assignment partners before human approval.</p>
         </div>
-        <button onClick={runAnalysis} disabled={analysisBusy} className="min-h-11 rounded-xl bg-gradient-to-r from-blue via-cyan to-teal px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">{analysisBusy ? "Analyzing..." : "Run AI Analysis"}</button>
+        <button onClick={runAnalysis} disabled={analysisBusy} className="impact-gradient min-h-11 rounded-xl px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">{analysisBusy ? "Analyzing..." : "Run AI Analysis"}</button>
       </div>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <main className="min-w-0 space-y-8">
@@ -155,7 +155,7 @@ export default function ChallengeReview() {
               ))}
             </div>
           </section>
-          <section className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-violet-50 p-6 shadow-sm">
+          <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-zinc-50 p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-navy">Assignment Intelligence</h2>
             <p className="mt-3 text-sm leading-7 text-slate-600">{topInstituteId ? "Top live institute recommendation is ready for assignment." : "Run AI analysis to populate live institute recommendations."}</p>
           </section>

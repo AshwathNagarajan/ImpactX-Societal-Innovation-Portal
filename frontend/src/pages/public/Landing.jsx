@@ -8,7 +8,7 @@ import ChallengeCard from "../../components/challenges/ChallengeCard.jsx";
 import ProjectCard from "../../components/dashboard/ProjectCard.jsx";
 import InstituteCard from "../../components/dashboard/InstituteCard.jsx";
 import IndustryCard from "../../components/dashboard/IndustryCard.jsx";
-const colors = ["#2563EB", "#0891B2", "#0D9488", "#7C3AED", "#16A34A", "#D97706", "#64748B"];
+const colors = ["#334155", "#475569", "#64748B", "#94A3B8", "#CBD5E1", "#71717A", "#52525B"];
 const icons = [Workflow, ShieldCheck, Lightbulb, Award, Building2, Factory, Map, Users];
 const networkNodes = ["Citizen","AI Analysis","Government","University","Industry","Impact"];
 export default function Landing() {
@@ -35,7 +35,7 @@ export default function Landing() {
           </div>
         </div>
         <div className="premium-surface relative hidden min-h-[500px] place-items-center overflow-hidden rounded-3xl border p-8 md:grid lg:min-h-[560px] lg:p-10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(37,99,235,.10),transparent_35%)]"/>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(100,116,139,.10),transparent_35%)]"/>
           <div className="relative grid w-full place-items-center">
             <div className="impactx-orbit relative">
               <div className="impactx-orbit-ring absolute inset-6 rounded-full border border-slate-500/10"/>
@@ -62,11 +62,11 @@ export default function Landing() {
       </div>
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">{kpis.map(([t,v,n],i)=><KPICard key={t} title={t} value={v} note={n} icon={icons[i]}/>)}</div>
       <div className="mt-12 grid gap-8 xl:grid-cols-2">
-        <ChartCard title="Challenges by Category"><ResponsiveContainer><BarChart data={chartData.category}><XAxis dataKey="name" hide/><YAxis/><Tooltip/><Bar dataKey="value" fill="transparent" stroke="#22d3ee" strokeWidth={2} radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></ChartCard>
-        <ChartCard title="Monthly Challenge Submissions"><ResponsiveContainer><LineChart data={chartData.monthly}><XAxis dataKey="month"/><YAxis/><Tooltip/><Line dataKey="submissions" stroke="#2563EB" strokeWidth={3}/><Line dataKey="resolved" stroke="#0D9488" strokeWidth={3}/></LineChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="Challenges by Category"><ResponsiveContainer><BarChart data={chartData.category}><XAxis dataKey="name" hide/><YAxis/><Tooltip/><Bar dataKey="value" fill="transparent" stroke="#64748B" strokeWidth={2} radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="Monthly Challenge Submissions"><ResponsiveContainer><LineChart data={chartData.monthly}><XAxis dataKey="month"/><YAxis/><Tooltip/><Line dataKey="submissions" stroke="#475569" strokeWidth={3}/><Line dataKey="resolved" stroke="#94A3B8" strokeWidth={3}/></LineChart></ResponsiveContainer></ChartCard>
         <ChartCard title="Challenge Status Distribution"><ResponsiveContainer><PieChart><Pie data={chartData.status} dataKey="value" nameKey="name" innerRadius={62} outerRadius={98}>{chartData.status.map((_,i)=><Cell key={i} fill={colors[i%colors.length]}/>)}</Pie><Tooltip/></PieChart></ResponsiveContainer></ChartCard>
-        <ChartCard title="Challenges by District"><ResponsiveContainer><BarChart data={chartData.district} layout="vertical" margin={{ left: 30 }}><XAxis type="number"/><YAxis dataKey="name" type="category"/><Tooltip/><Bar dataKey="challenges" fill="transparent" stroke="#34d399" strokeWidth={2} radius={[0,6,6,0]}/></BarChart></ResponsiveContainer></ChartCard>
-        <ChartCard title="University vs Industry Participation"><ResponsiveContainer><BarChart data={chartData.participation}><XAxis dataKey="name"/><YAxis/><Tooltip/><Bar dataKey="institutes" fill="transparent" stroke="#22d3ee" strokeWidth={2}/><Bar dataKey="industries" fill="transparent" stroke="#a78bfa" strokeWidth={2}/></BarChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="Challenges by District"><ResponsiveContainer><BarChart data={chartData.district} layout="vertical" margin={{ left: 30 }}><XAxis type="number"/><YAxis dataKey="name" type="category"/><Tooltip/><Bar dataKey="challenges" fill="transparent" stroke="#64748B" strokeWidth={2} radius={[0,6,6,0]}/></BarChart></ResponsiveContainer></ChartCard>
+        <ChartCard title="University vs Industry Participation"><ResponsiveContainer><BarChart data={chartData.participation}><XAxis dataKey="name"/><YAxis/><Tooltip/><Bar dataKey="institutes" fill="transparent" stroke="#475569" strokeWidth={2}/><Bar dataKey="industries" fill="transparent" stroke="#94A3B8" strokeWidth={2}/></BarChart></ResponsiveContainer></ChartCard>
         <ChartCard title="Impact by Sector"><ResponsiveContainer><RadarChart data={chartData.impact}><PolarGrid/><PolarAngleAxis dataKey="sector"/><Radar dataKey="impact" fill="#D97706" fillOpacity={0.25} stroke="#D97706"/></RadarChart></ResponsiveContainer></ChartCard>
       </div>
       <Section title="Recent Challenges"><div className="grid gap-6 lg:grid-cols-3">{challenges.slice(0,3).map(c=><ChallengeCard key={c.id} challenge={c}/>)}</div></Section>

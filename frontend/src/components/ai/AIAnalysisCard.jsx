@@ -6,7 +6,7 @@ import SeverityIndicator from "./SeverityIndicator.jsx";
 export default function AIAnalysisCard({ analysis, compact = false }) {
   if (!analysis || Object.keys(analysis).length === 0) {
     return (
-      <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-violet-50 p-6 shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-zinc-50 p-6 shadow-sm">
         <p className="text-sm font-semibold text-blue">AI Challenge Intelligence</p>
         <p className="mt-3 text-sm leading-7 text-slate-600">AI analysis has not been generated yet. Admin users can run analysis from the review workflow.</p>
       </div>
@@ -15,7 +15,7 @@ export default function AIAnalysisCard({ analysis, compact = false }) {
   const expertise = analysis.required_expertise || analysis.recommended_domains || [];
   const technologies = analysis.recommended_technologies || [];
   return (
-    <section className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-violet-50 p-5 shadow-sm md:p-6 lg:p-8">
+    <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-zinc-50 p-5 shadow-sm md:p-6 lg:p-8">
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div className="min-w-0">
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-3 py-1 text-xs font-semibold text-blue">
@@ -55,4 +55,3 @@ function InfoList({ title, items }) {
     </div>
   );
 }
-

@@ -7,9 +7,8 @@ export default function MilestoneCard({ milestone }) {
       </div>
       <p className="mt-3 text-sm leading-6 text-slate-600">{milestone.description}</p>
       <div className="mt-5 h-2 rounded-full bg-slate-100">
-        <div className="h-full rounded-full bg-gradient-to-r from-blue via-cyan to-teal" style={{ width: `${milestone.completion_percentage || 0}%` }} />
+        <div className="impact-gradient h-full rounded-full" style={{ width: `${milestone.completion_percentage || 0}%` }} />
       </div>
     </article>
   );
 }
-

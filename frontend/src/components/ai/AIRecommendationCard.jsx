@@ -17,10 +17,9 @@ export default function AIRecommendationCard({ title, subtitle, match = 0, reaso
           <span key={tag} className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal">{tag}</span>
         ))}
       </div>
-      <button onClick={onAction} className="mt-6 min-h-11 rounded-xl bg-gradient-to-r from-blue via-cyan to-teal px-5 py-2.5 text-sm font-semibold text-white">
+      <button onClick={onAction} className="impact-gradient mt-6 min-h-11 rounded-xl px-5 py-2.5 text-sm font-semibold text-white">
         {actionLabel}
       </button>
     </article>
   );
 }
-
