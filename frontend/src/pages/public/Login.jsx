@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, Factory, Shield, Share2 } from "lucide-react";
+import { Building2, Factory, Shield } from "lucide-react";
 import { loginWithApi } from "../../services/authService.js";
 import { credentials, rolePath, saveUser } from "../../utils/auth.js";
 const roles = [["admin","Admin",Shield],["institute","Institute",Building2],["industry","Industry",Factory]];
@@ -39,7 +39,7 @@ export default function Login() {
     <section className="relative order-2 hidden overflow-hidden border-r border-slate-200 bg-white p-8 lg:order-1 lg:block lg:p-12 xl:p-16">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(100,116,139,.10),transparent_32%),radial-gradient(circle_at_75%_65%,rgba(148,163,184,.09),transparent_32%)]"/>
       <div className="relative flex min-h-[260px] flex-col justify-between gap-8 lg:h-full lg:min-h-[420px]">
-        <div className="flex items-center gap-3 text-xl font-semibold text-navy lg:text-2xl"><span className="impact-gradient grid h-11 w-11 place-items-center rounded-2xl text-white"><Share2 size={20}/></span>IMPACTX</div>
+        <div className="flex items-center gap-3 text-xl font-semibold text-navy lg:text-2xl"><img src="/impactx-logo.png" alt="IMPACTX" className="h-12 w-12 rounded-xl object-contain" />IMPACTX</div>
         <div><h1 className="max-w-xl text-3xl font-semibold leading-tight tracking-tight text-navy sm:text-4xl lg:text-5xl">Connect. Collaborate.<br/><span className="impact-gradient-text">Create Impact.</span></h1><p className="mt-5 max-w-xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg lg:leading-8">A secure civic innovation workspace for government validation, institute research teams and industry partnerships.</p></div>
         <div className="grid max-w-lg grid-cols-3 gap-4">{["Citizen","AI","Impact"].map(n=><div key={n} className="rounded-2xl border bg-white p-5 text-center text-sm text-slate-600 shadow-sm"><span className="mx-auto mb-3 block h-2 w-2 rounded-full bg-blue"/>{n}</div>)}</div>
       </div>
