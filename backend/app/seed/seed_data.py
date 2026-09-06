@@ -15,67 +15,32 @@ DEMO_USERS = [
 
 INSTITUTES = [
     {
-        "name": "Institute A - AI Agriculture Lab",
-        "departments": ["Computer Science", "AI & Data Science", "Biotechnology"],
-        "expertise": ["AI", "Data Science", "Computer Vision", "Agriculture Technology"],
-        "research_domains": ["Crop disease detection", "Remote advisory systems"],
-        "facilities": ["GPU lab", "Field validation network"],
-        "previous_projects": ["Leaf image disease classifier", "Farmer advisory chatbot"],
+        "name": "BIT Mesra Innovation Cell",
+        "email": "institute@impactx.in",
+        "departments": ["Computer Science", "AI & Data Science", "Electronics", "Civil Engineering"],
+        "expertise": ["AI", "Data Science", "Computer Vision", "IoT", "Water Management", "Agriculture Technology"],
+        "research_domains": ["Crop disease detection", "Pipeline leakage", "Remote advisory systems", "Water quality sensing"],
+        "facilities": ["GPU lab", "IoT lab", "Field validation network", "Community survey unit"],
+        "previous_projects": ["Leaf image disease classifier", "Farmer advisory chatbot", "Low-cost leak detection"],
         "district": "Ranchi",
-        "availability": True,
-    },
-    {
-        "name": "Institute B - Water and Environment Center",
-        "departments": ["Civil Engineering", "Environmental Engineering"],
-        "expertise": ["Water Management", "Sanitation", "Environmental Monitoring"],
-        "research_domains": ["Pipeline leakage", "Water quality sensing"],
-        "facilities": ["Hydrology lab", "Community survey unit"],
-        "previous_projects": ["Low-cost leak detection", "Water testing kits"],
-        "district": "Dhanbad",
-        "availability": True,
-    },
-    {
-        "name": "Institute C - Embedded Systems Lab",
-        "departments": ["Electronics", "IoT", "Mechanical"],
-        "expertise": ["Embedded Systems", "IoT", "Disaster Monitoring", "Sensors"],
-        "research_domains": ["Flood warning", "Low-power sensor networks"],
-        "facilities": ["PCB fabrication", "Sensor calibration"],
-        "previous_projects": ["River-level alert node", "Solar telemetry station"],
-        "district": "Sahibganj",
         "availability": True,
     },
 ]
 
 INDUSTRIES = [
     {
-        "name": "Industry A - Civic Cloud Labs",
-        "sector": "Technology",
-        "expertise": ["Cloud", "AI", "Data Analytics"],
-        "technologies": ["Model hosting", "Dashboards", "APIs"],
-        "support_types": ["Cloud Credits", "Technical Mentorship"],
-        "csr_domains": ["Education", "Agriculture", "Health"],
-        "previous_projects": ["District analytics platform"],
+        "name": "Tata Steel Foundation",
+        "email": "industry@impactx.in",
+        "sector": "CSR, Technology and Manufacturing",
+        "expertise": ["Cloud", "AI", "Data Analytics", "IoT", "Manufacturing", "Pilot Deployment", "CSR Funding"],
+        "technologies": ["Model hosting", "Dashboards", "APIs", "Sensors", "Low-cost fabrication"],
+        "support_types": ["Funding", "Technical Mentorship", "Equipment", "Prototype Support", "Pilot Deployment", "Manufacturing"],
+        "csr_domains": ["Education", "Agriculture", "Health", "Water", "Disaster Management", "Livelihood"],
+        "previous_projects": ["District analytics platform", "Flood sensor pilot", "Assistive device scale-up"],
         "locations": ["Ranchi", "Jamshedpur"],
-    },
-    {
-        "name": "Industry B - SensorWorks India",
-        "sector": "Hardware",
-        "expertise": ["IoT", "Sensors", "Hardware Prototyping"],
-        "technologies": ["LoRa", "Water sensors", "Embedded boards"],
-        "support_types": ["Equipment", "Prototype Support", "Pilot Support"],
-        "csr_domains": ["Water", "Disaster Management"],
-        "previous_projects": ["Flood sensor pilot"],
-        "locations": ["Dhanbad", "Sahibganj"],
-    },
-    {
-        "name": "Industry C - Social Impact Manufacturing",
-        "sector": "Manufacturing",
-        "expertise": ["Manufacturing", "Pilot Deployment", "CSR Funding"],
-        "technologies": ["Tooling", "Low-cost fabrication"],
-        "support_types": ["Manufacturing", "Funding", "Market Access"],
-        "csr_domains": ["Livelihood", "Accessibility"],
-        "previous_projects": ["Assistive device scale-up"],
-        "locations": ["Ranchi", "Dumka"],
+        "funding_committed": 38000000,
+        "funding_utilized": 21000000,
+        "funding_currency": "INR",
     },
 ]
 
@@ -295,6 +260,9 @@ async def seed() -> None:
             },
             upsert=True,
         )
+
+    await database.institutes.delete_many({"name": {"$nin": [item["name"] for item in INSTITUTES]}})
+    await database.industries.delete_many({"name": {"$nin": [item["name"] for item in INDUSTRIES]}})
 
     for item in INSTITUTES:
         await database.institutes.update_one({"name": item["name"]}, {"$set": {**item, "updated_at": now}, "$setOnInsert": {"created_at": now}}, upsert=True)

@@ -141,6 +141,34 @@ def chart_bundle(challenges: list[dict], institutes: list[dict], industries: lis
     }
 
 
+def funding_summary(projects: list[dict], industries: list[dict]) -> dict:
+    committed = sum(int(item.get("funding_committed") or 0) for item in industries)
+    utilized = sum(int(item.get("funding_utilized") or 0) for item in industries)
+    funded_projects = [
+        item
+        for item in projects
+        if "Funding" in (item.get("required_support") or [])
+        or "Funding" in ((item.get("proposal") or {}).get("required_support") or [])
+        or item.get("funding_amount")
+    ]
+    return {
+        "currency": "INR",
+        "committed": committed,
+        "utilized": utilized,
+        "available": max(0, committed - utilized),
+        "funded_projects": len(funded_projects),
+        "utilization_percent": round((utilized / committed) * 100) if committed else 0,
+        "by_industry": [
+            {
+                "name": item.get("name", "Industry"),
+                "committed": int(item.get("funding_committed") or 0),
+                "utilized": int(item.get("funding_utilized") or 0),
+            }
+            for item in industries
+        ],
+    }
+
+
 async def public_data() -> dict:
     database = get_database()
     challenges_raw = [item async for item in database.challenges.find({}).sort("created_at", -1)]
@@ -179,4 +207,5 @@ async def public_data() -> dict:
         "statuses": STATUSES,
         "priorities": PRIORITIES,
         "supportTypes": SUPPORT_TYPES,
+        "funding": funding_summary(projects_raw, industries_raw),
     }
