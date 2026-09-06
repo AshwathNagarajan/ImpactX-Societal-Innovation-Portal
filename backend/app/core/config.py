@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60
 
     huggingface_token: str = ""
-    hf_generation_model: str = "Qwen/Qwen2.5-0.5B-Instruct"
+    hf_generation_model: str = "Qwen/Qwen3-4B-Instruct-2507"
     hf_embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
     frontend_url: str = "http://localhost:5173"

@@ -33,16 +33,6 @@ required_expertise, recommended_technologies, recommended_departments,
 recommended_institutes, potential_industry_support, possible_government_schemes,
 suggested_solution_direction, risk_factors, expected_social_impact, confidence_score.
 """
-    if "qwen" in settings.hf_generation_model.lower():
-        return (
-            "<|im_start|>system\n"
-            f"{system_prompt}\n"
-            "<|im_end|>\n"
-            "<|im_start|>user\n"
-            f"{user_prompt.strip()}\n"
-            "<|im_end|>\n"
-            "<|im_start|>assistant\n"
-        )
     return f"""
 {system_prompt}
 
@@ -65,11 +55,14 @@ async def generate_structured_analysis(challenge: Dict[str, Any], context: List[
     if not settings.huggingface_token:
         return fallback_generation(challenge, context, "missing_huggingface_token")
 
-    prompt = build_prompt(challenge, context)
     headers = {
         "Authorization": f"Bearer {settings.huggingface_token}",
         "Content-Type": "application/json",
     }
+    if "qwen" in settings.hf_generation_model.lower():
+        return await _generate_with_router_chat(challenge, context, headers)
+
+    prompt = build_prompt(challenge, context)
     url = f"https://api-inference.huggingface.co/models/{settings.hf_generation_model}"
     try:
         async with httpx.AsyncClient(timeout=60) as client:
@@ -100,6 +93,64 @@ async def generate_structured_analysis(challenge: Dict[str, Any], context: List[
         return generated
     except (ValueError, json.JSONDecodeError):
         return fallback_generation(challenge, context, "invalid_huggingface_json")
+
+
+async def _generate_with_router_chat(challenge: Dict[str, Any], context: List[Dict[str, Any]], headers: Dict[str, str]) -> Dict[str, Any]:
+    context_text = "\n\n".join(
+        f"SOURCE: {item.get('source')} | TYPE: {item.get('type')} | SCORE: {item.get('score'):.3f}\n{item.get('text')}"
+        for item in context
+    )
+    system_prompt = (
+        "You are the AI analysis engine for IMPACTX, a societal innovation collaboration platform. "
+        "Ground your analysis only in the challenge information and retrieved context. "
+        "Do not invent institutions, schemes, technologies, or previous projects. "
+        "Return only valid JSON. Do not include markdown, explanations, or code fences."
+    )
+    user_prompt = f"""
+CONTEXT:
+{context_text or "No retrieved context available."}
+
+CHALLENGE:
+{json.dumps(challenge, ensure_ascii=False, default=str)}
+
+TASK:
+Return a JSON object with these keys:
+summary, category, subcategory, priority_score, priority_level,
+impact_score, duplicate_probability, similar_challenges, recommended_domains,
+required_expertise, recommended_technologies, recommended_departments,
+recommended_institutes, potential_industry_support, possible_government_schemes,
+suggested_solution_direction, risk_factors, expected_social_impact, confidence_score.
+"""
+    try:
+        async with httpx.AsyncClient(timeout=60) as client:
+            response = await client.post(
+                "https://router.huggingface.co/v1/chat/completions",
+                headers=headers,
+                json={
+                    "model": settings.hf_generation_model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt.strip()},
+                    ],
+                    "max_tokens": 900,
+                    "temperature": 0.2,
+                },
+            )
+            response.raise_for_status()
+            payload = response.json()
+    except httpx.HTTPStatusError as exc:
+        return fallback_generation(challenge, context, f"huggingface_router_http_{exc.response.status_code}")
+    except httpx.HTTPError as exc:
+        return fallback_generation(challenge, context, exc.__class__.__name__)
+
+    try:
+        text = payload["choices"][0]["message"]["content"]
+        generated = json.loads(_extract_json_object(text))
+        generated["_generation_source"] = "huggingface_router"
+        generated["_generation_model"] = settings.hf_generation_model
+        return generated
+    except (KeyError, IndexError, TypeError, ValueError, json.JSONDecodeError):
+        return fallback_generation(challenge, context, "invalid_huggingface_router_json")
 
 
 async def check_huggingface_generation() -> Dict[str, Any]:
