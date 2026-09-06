@@ -216,3 +216,7 @@ The first backend slice includes:
 - Deterministic priority scoring and embedding-based duplicate checks
 
 The frontend still keeps its existing mock/localStorage behavior until API migration is performed route by route.
+
+## Demo Video
+
+https://github.com/user-attachments/assets/05f92c77-ff79-4467-b2d7-7247e296e137
