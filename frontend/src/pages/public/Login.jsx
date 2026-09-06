@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Building2, Factory, LockKeyhole, Mail, Shield, Sparkles } from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, Factory, LockKeyhole, Mail, Shield, Sparkles } from "lucide-react";
 import { loginWithApi } from "../../services/authService.js";
 import { credentials, rolePath, saveUser } from "../../utils/auth.js";
 
@@ -10,7 +10,11 @@ const roles = [
   { id: "industry", label: "Industry", description: "Funding and pilots", icon: Factory },
 ];
 
-const metrics = ["Live backend auth", "Role based routing", "MongoDB workspace"];
+const metrics = [
+  ["3", "secure workspaces"],
+  ["24", "districts connected"],
+  ["2.4L+", "citizens impacted"],
+];
 
 export default function Login() {
   const [role, setRole] = useState("admin");
@@ -53,19 +57,65 @@ export default function Login() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-72px)] bg-slate-950 px-4 py-8 text-white sm:px-6 lg:px-10">
-      <div className="mx-auto flex min-h-[calc(100vh-136px)] max-w-6xl items-center justify-center">
-        <section className="grid w-full overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] shadow-2xl shadow-black/30 lg:grid-cols-[360px_minmax(0,1fr)]">
-          <aside className="border-b border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.03))] p-6 sm:p-8 lg:border-b-0 lg:border-r">
+    <main className="relative isolate min-h-[calc(100vh-72px)] overflow-hidden bg-transparent px-4 py-8 text-slate-100 sm:px-6 lg:px-10 lg:py-12">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_12%,rgba(148,163,184,.18),transparent_34%),radial-gradient(circle_at_88%_18%,rgba(100,116,139,.18),transparent_32%),linear-gradient(135deg,rgba(17,24,39,.72)_0%,rgba(30,41,59,.84)_52%,rgba(38,50,68,.72)_100%)]" />
+      <div className="mx-auto grid min-h-[calc(100vh-168px)] max-w-[1280px] items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(420px,.95fr)]">
+        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-800/80 p-6 shadow-[0_24px_80px_rgba(15,23,42,.22)] sm:p-8 lg:p-10">
+          <div className="absolute right-0 top-0 h-48 w-48 rounded-bl-full bg-white/5" />
+          <div className="relative">
             <div className="flex items-center gap-4">
-              <img src="/impactx-logo.png" alt="IMPACTX" className="h-14 w-14 rounded-2xl bg-white object-contain p-1" />
+              <img src="/impactx-logo.png" alt="IMPACTX" className="h-14 w-14 rounded-2xl border border-slate-200 bg-white object-contain p-2 shadow-sm" />
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">IMPACTX</p>
-                <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white">Secure access</h1>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Secure access</p>
+                <h1 className="mt-1 text-2xl font-semibold tracking-tight text-navy">IMPACTX</h1>
               </div>
             </div>
 
-            <div className="mt-8 space-y-3">
+            <div className="mt-16 max-w-2xl lg:mt-24">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <Sparkles size={14} />
+                Civic innovation command center
+              </span>
+              <h2 className="mt-6 text-4xl font-semibold leading-tight tracking-tight text-navy sm:text-5xl lg:text-6xl">
+                Connect public problems to accountable action.
+              </h2>
+              <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 lg:text-lg">
+                A professional workspace for government validation, institute research teams and industry partners building measurable social impact.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              {metrics.map(([value, label]) => (
+                <div key={label} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <p className="impact-gradient-text text-3xl font-semibold tracking-tight">{value}</p>
+                  <p className="mt-2 text-sm text-slate-500">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p className="text-sm font-semibold text-navy">Access workflow</p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                {["Authenticate role", "Open dashboard", "Coordinate impact"].map((item) => (
+                  <div key={item} className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-medium text-slate-600">
+                    <CheckCircle2 size={17} className="text-slate-500" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-[2rem] border border-white/10 bg-slate-800/80 p-5 shadow-[0_24px_80px_rgba(15,23,42,.24)] sm:p-7 lg:p-8">
+          <div className="rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-slate-800/90 to-slate-900/80 p-5 sm:p-7">
+            <div>
+              <p className="text-sm font-semibold text-blue">Welcome to IMPACTX</p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-navy sm:text-4xl">Sign in to your workspace</h2>
+              <p className="mt-3 text-sm leading-7 text-slate-500">Choose the workspace role.</p>
+            </div>
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-3">
               {roles.map(({ id, label, description, icon: Icon }) => {
                 const selected = role === id;
                 return (
@@ -73,58 +123,35 @@ export default function Login() {
                     key={id}
                     type="button"
                     onClick={() => pick(id)}
-                    className={`flex min-h-20 w-full items-center gap-4 rounded-2xl border p-4 text-left transition ${selected ? "border-white/30 bg-white text-slate-950" : "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.07]"}`}
+                    className={`flex min-h-24 flex-col items-start justify-between rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${selected ? "border-slate-700 bg-slate-800 text-white shadow-lg shadow-slate-900/10" : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:shadow-sm"}`}
                   >
-                    <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${selected ? "bg-slate-950 text-white" : "bg-white/10 text-slate-200"}`}>
-                      <Icon size={20} />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold">{label}</span>
-                      <span className={`mt-1 block text-xs leading-5 ${selected ? "text-slate-600" : "text-slate-400"}`}>{description}</span>
+                    <Icon size={20} className={selected ? "text-white" : "text-slate-500"} />
+                    <span>
+                      <span className="block text-sm font-semibold uppercase tracking-wide">{label}</span>
+                      <span className={`mt-1 hidden text-xs leading-5 sm:block ${selected ? "text-slate-300" : "text-slate-500"}`}>{description}</span>
                     </span>
                   </button>
                 );
               })}
             </div>
 
-            <div className="mt-8 grid gap-3">
-              {metrics.map((item) => (
-                <div key={item} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
-                  <Sparkles size={15} className="text-slate-400" />
-                  {item}
-                </div>
-              ))}
-            </div>
-          </aside>
-
-          <div className="p-6 sm:p-8 lg:p-10">
-            <div className="max-w-xl">
-              <p className="text-sm font-semibold text-slate-400">{activeRole.name}</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">Sign in to your workspace</h2>
-              <p className="mt-3 text-sm leading-7 text-slate-400">Use the selected role credentials to enter the correct dashboard.</p>
-            </div>
-
-            <form onSubmit={submit} className="mt-8 max-w-xl space-y-5">
+            <form onSubmit={submit} className="mt-8 space-y-5">
               <Field label="Email" icon={Mail}>
-                <input value={email} onChange={(event) => setEmail(event.target.value)} className="min-h-12 w-full border-0 bg-transparent p-0 text-white outline-none placeholder:text-slate-500" autoComplete="email" />
+                <input value={email} onChange={(event) => setEmail(event.target.value)} className="min-h-12 w-full border-0 bg-transparent p-0 text-slate-100 outline-none placeholder:text-slate-500" autoComplete="email" />
               </Field>
               <Field label="Password" icon={LockKeyhole}>
-                <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="min-h-12 w-full border-0 bg-transparent p-0 text-white outline-none placeholder:text-slate-500" autoComplete="current-password" />
+                <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="min-h-12 w-full border-0 bg-transparent p-0 text-slate-100 outline-none placeholder:text-slate-500" autoComplete="current-password" />
               </Field>
 
-              <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-300 sm:grid-cols-2">
-                <p><span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Email</span>{activeRole.email}</p>
-                <p><span className="block text-xs uppercase tracking-[0.18em] text-slate-500">Password</span>{activeRole.password}</p>
-              </div>
+              {error && <p className="rounded-2xl border border-red-100 bg-red-50 p-4 text-sm font-semibold text-red-600">{error}</p>}
 
-              {error && <p className="rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm font-semibold text-red-200">{error}</p>}
-
-              <button disabled={busy} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-semibold text-slate-950 shadow-sm transition hover:bg-slate-200 disabled:opacity-60">
+              <button disabled={busy} className="impact-gradient flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold text-white shadow-sm transition disabled:opacity-60">
                 {busy ? "Signing in..." : "Enter workspace"}
                 {!busy && <ArrowRight size={18} />}
               </button>
             </form>
           </div>
+          <p className="mt-5 text-center text-xs leading-6 text-slate-400">Protected dashboards use backend authentication and role-based routing.</p>
         </section>
       </div>
     </main>
@@ -133,10 +160,10 @@ export default function Login() {
 
 function Field({ label, icon: Icon, children }) {
   return (
-    <label className="block text-sm font-semibold text-slate-300">
+    <label className="block text-sm font-semibold text-slate-700">
       {label}
-      <span className="mt-2 flex min-h-14 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 focus-within:border-white/30 focus-within:ring-4 focus-within:ring-white/10">
-        <Icon className="shrink-0 text-slate-500" size={18} />
+      <span className="mt-2 flex min-h-14 items-center gap-3 rounded-xl border border-white/10 bg-slate-900/45 px-4 focus-within:border-slate-400 focus-within:ring-4 focus-within:ring-slate-400/10">
+        <Icon className="shrink-0 text-slate-400" size={18} />
         {children}
       </span>
     </label>

@@ -5,6 +5,7 @@ import ProjectHealthCard from "../../components/ai/ProjectHealthCard.jsx";
 import ProjectLifecycle from "../../components/ai/ProjectLifecycle.jsx";
 import ProgressBar from "../../components/common/ProgressBar.jsx";
 import { useImpactData } from "../../hooks/useImpactData.js";
+import { getLifecycleProgress } from "../../utils/projectLifecycle.js";
 
 export default function ProjectPage() {
   const { id } = useParams();
@@ -15,6 +16,7 @@ export default function ProjectPage() {
   const team = data.teams[0] || { mentor: "Faculty mentor", departments: ["CSE", "AI & DS", "ECE"] };
   if (!p) return <div className="rounded-2xl border bg-white p-6 shadow-sm">Loading database project...</div>;
   const currentStage = (p.status || p.stage || "PROTOTYPE").toUpperCase?.().replaceAll(" ", "_");
+  const progress = getLifecycleProgress(p);
 
   return (
     <div className="min-w-0 space-y-10">
@@ -39,7 +41,7 @@ export default function ProjectPage() {
             {p.technology} based solution with offline-first workflows, local language support and admin impact reporting.
           </p>
           <div className="mt-7">
-            <ProgressBar value={p.progress} />
+            <ProgressBar value={progress} />
           </div>
         </section>
 
@@ -53,7 +55,7 @@ export default function ProjectPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <ProjectHealthCard health={{ health: "ON_TRACK", health_score: 84, progress: p.progress, summary: "Prototype phase is progressing as expected. Field-testing access is the next major dependency." }} />
+        <ProjectHealthCard health={{ health: "ON_TRACK", health_score: 84, progress, summary: `Project lifecycle is ${progress}% complete based on the current stage.` }} />
         <NextActionsCard actions={["Finalize prototype testing evidence", "Schedule district field validation", "Confirm industry sensor support", "Prepare pilot success metrics"]} />
       </div>
 

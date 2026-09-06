@@ -2,19 +2,20 @@ import { Check, Clock, Flag, Lock, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { projectService } from "../../services/projectService.js";
 import { getUser } from "../../utils/auth.js";
+import { getLifecycleProgress } from "../../utils/projectLifecycle.js";
 
 const defaultSteps = ["PLANNING", "RESEARCH", "SOLUTION_DESIGN", "PROTOTYPE", "TESTING", "PILOT", "IMPLEMENTATION", "IMPACT_MONITORING", "COMPLETED"];
 
 const labels = {
   PLANNING: "Challenge Intake",
-  RESEARCH: "Research Validation",
-  SOLUTION_DESIGN: "Solution Blueprint",
-  PROTOTYPE: "Prototype Build",
-  TESTING: "Lab & Field Testing",
-  PILOT: "Pilot Deployment",
+  RESEARCH: "Research",
+  SOLUTION_DESIGN: "Blueprint",
+  PROTOTYPE: "Prototype",
+  TESTING: "Testing",
+  PILOT: "Pilot",
   IMPLEMENTATION: "Implementation",
-  IMPACT_MONITORING: "Impact Monitoring",
-  COMPLETED: "Impact Closed",
+  IMPACT_MONITORING: "Impact Review",
+  COMPLETED: "Closed / Completed",
 };
 
 const descriptions = {
@@ -42,14 +43,16 @@ function buildSteps(current) {
     label: labels[stage],
     summary: descriptions[stage],
     state: index < currentIndex ? "completed" : index === currentIndex ? "current" : "upcoming",
+    progress: getLifecycleProgress(stage),
   }));
 }
 
 export default function ProjectLifecycle({ project, current = "PROTOTYPE", steps, actions = [], history = [], onUpdated }) {
   const user = getUser();
   const projectId = project?.id || project?.project_id;
-  const lifecycle = steps?.length ? steps : project?.lifecycle?.length ? project.lifecycle : buildSteps(project?.status || project?.stage || current);
+  const lifecycle = steps?.length ? steps : buildSteps(project?.status || project?.current_stage?.stage || project?.stage || current);
   const currentStep = lifecycle.find((step) => step.state === "current") || lifecycle[0];
+  const progress = getLifecycleProgress(currentStep?.stage || project);
   const roleActions = actions.length ? actions : availableFallbackActions(currentStep?.stage, user?.role);
   const [busy, setBusy] = useState("");
   const [note, setNote] = useState("");
@@ -87,7 +90,7 @@ export default function ProjectLifecycle({ project, current = "PROTOTYPE", steps
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Current owner</p>
           <p className="mt-1 text-lg font-semibold text-navy">{currentStep?.owner || ownerForStage(currentStep?.stage)}</p>
           <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Project progress</p>
-          <p className="mt-1 text-3xl font-semibold text-blue">{project?.progress ?? currentStep?.progress ?? 0}%</p>
+          <p className="mt-1 text-3xl font-semibold text-blue">{progress}%</p>
         </div>
       </div>
 

@@ -20,7 +20,7 @@ async def create_project(payload: ProjectCreate) -> dict:
     document.update(
         {
             "project_id": await generate_project_id(),
-            "progress": 0,
+            "progress": int(current_stage_detail(document["status"]).get("progress") or 10),
             "prototype_status": "NOT_STARTED",
             "pilot_status": "NOT_STARTED",
             "implementation_status": "NOT_STARTED",
@@ -32,19 +32,19 @@ async def create_project(payload: ProjectCreate) -> dict:
         }
     )
     await get_database().projects.insert_one(document)
-    return serialize_document(document)
+    return with_stage_progress(serialize_document(document))
 
 
 async def list_projects() -> list[dict]:
     cursor = get_database().projects.find().sort("created_at", -1)
-    return [serialize_document(item) async for item in cursor]
+    return [with_stage_progress(serialize_document(item)) async for item in cursor]
 
 
 async def get_project(project_id: str) -> dict:
     project = await get_database().projects.find_one({"project_id": project_id})
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    return serialize_document(project)
+    return with_stage_progress(serialize_document(project))
 
 
 async def project_lifecycle(project_id: str, user: dict | None = None) -> dict:
@@ -64,13 +64,13 @@ async def project_lifecycle(project_id: str, user: dict | None = None) -> dict:
 
 
 async def update_project(project_id: str, updates: dict) -> dict:
-    allowed = {"title", "team", "mentor", "proposal", "progress", "prototype_status", "pilot_status", "implementation_status", "impact_metrics"}
+    allowed = {"title", "team", "mentor", "proposal", "prototype_status", "pilot_status", "implementation_status", "impact_metrics"}
     updates = {key: value for key, value in updates.items() if key in allowed}
     updates["updated_at"] = utc_now()
     result = await get_database().projects.find_one_and_update({"project_id": project_id}, {"$set": updates}, return_document=ReturnDocument.AFTER)
     if not result:
         raise HTTPException(status_code=404, detail="Project not found")
-    return serialize_document(result)
+    return with_stage_progress(serialize_document(result))
 
 
 async def transition_project(project_id: str, payload: ProjectTransitionRequest, user: dict) -> dict:
@@ -89,7 +89,7 @@ async def transition_project(project_id: str, payload: ProjectTransitionRequest,
         {
             "$set": {
                 "status": target,
-                "progress": max(int(project.get("progress") or 0), int(target_detail.get("progress") or 0)),
+                "progress": int(target_detail.get("progress") or 10),
                 "lifecycle": lifecycle_steps(target),
                 "updated_at": utc_now(),
             },
@@ -97,7 +97,7 @@ async def transition_project(project_id: str, payload: ProjectTransitionRequest,
         },
     )
     updated = await database.projects.find_one({"project_id": project_id})
-    return serialize_document(updated)
+    return with_stage_progress(serialize_document(updated))
 
 
 async def advance_project(project_id: str, note: str, user: dict) -> dict:
@@ -108,3 +108,13 @@ async def advance_project(project_id: str, note: str, user: dict) -> dict:
     if not actions:
         raise HTTPException(status_code=403, detail="No lifecycle action is available for your role at this stage.")
     return await transition_project(project_id, ProjectTransitionRequest(target_status=actions[0]["target_status"], note=note), user)
+
+
+def with_stage_progress(project: dict) -> dict:
+    stage = normalize_stage(project.get("status") or project.get("stage"))
+    detail = current_stage_detail(stage)
+    project["status"] = stage
+    project["progress"] = int(detail.get("progress") or 10)
+    project["current_stage"] = detail
+    project["lifecycle"] = lifecycle_steps(stage)
+    return project

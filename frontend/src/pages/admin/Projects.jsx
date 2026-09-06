@@ -4,6 +4,7 @@ import Modal from "../../components/common/Modal.jsx";
 import ProgressBar from "../../components/common/ProgressBar.jsx";
 import ProjectCard from "../../components/dashboard/ProjectCard.jsx";
 import { useImpactData } from "../../hooks/useImpactData.js";
+import { getLifecycleLabel, getLifecycleProgress } from "../../utils/projectLifecycle.js";
 
 const stageLabels = {
   PLANNING: "Challenge Intake",
@@ -33,9 +34,8 @@ export default function Projects() {
         id,
         current_stage: project.current_stage,
         lifecycle: project.lifecycle,
-        progress: project.progress,
         status: project.status,
-        stage: project.current_stage?.label || stageLabels[project.status] || project.status,
+        stage: project.current_stage?.label || getLifecycleLabel(project.status),
       },
     }));
   };
@@ -93,16 +93,16 @@ export default function Projects() {
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{selected.university || "Partner Institute"}</p>
               <h3 className="mt-2 text-2xl font-semibold leading-tight text-navy">{selected.title}</h3>
               <div className="mt-5 grid gap-4 md:grid-cols-3">
-                <Info label="Stage" value={selected.current_stage?.label || selected.stage || stageLabels[selected.status] || selected.status} />
+                <Info label="Stage" value={selected.current_stage?.label || selected.stage || getLifecycleLabel(selected.status)} />
                 <Info label="Support" value={selected.support || "Technical Mentorship"} />
                 <Info label="Technology" value={selected.technology || "Civic Technology"} />
               </div>
               <div className="mt-5">
                 <div className="mb-2 flex items-center justify-between text-sm text-slate-600">
                   <span className="font-semibold">Overall progress</span>
-                  <span>{selected.progress}%</span>
+                  <span>{getLifecycleProgress(selected)}%</span>
                 </div>
-                <ProgressBar value={selected.progress} />
+                <ProgressBar value={getLifecycleProgress(selected)} />
               </div>
             </div>
             <ProjectLifecycle project={selected} onUpdated={onUpdated} />

@@ -1,21 +1,11 @@
 from datetime import datetime, timezone
 from typing import Any
 
-from app.ai.project_intelligence.lifecycle import STAGE_WEIGHTS, normalize_stage
+from app.ai.project_intelligence.lifecycle import current_stage_detail, normalize_stage
 
 
 def calculate_progress(project: dict[str, Any], milestones: list[dict[str, Any]] | None = None) -> int:
-    milestones = milestones or []
-    if milestones:
-        total = 0
-        weight_total = 0
-        for milestone in milestones:
-            stage = normalize_stage(milestone.get("stage"))
-            weight = STAGE_WEIGHTS.get(stage, 10)
-            total += int(milestone.get("completion_percentage") or 0) * weight
-            weight_total += weight
-        return round(total / max(1, weight_total))
-    return int(project.get("progress") or 0)
+    return int(current_stage_detail(normalize_stage(project.get("status") or project.get("stage"))).get("progress") or 10)
 
 
 def evaluate_project_health(project: dict[str, Any], milestones: list[dict[str, Any]] | None = None) -> dict[str, Any]:
@@ -58,4 +48,3 @@ def evaluate_project_health(project: dict[str, Any], milestones: list[dict[str, 
         "recommended_actions": recommended_actions,
         "summary": f"Project health is {health.replace('_', ' ').lower()} with {progress}% deterministic progress.",
     }
-

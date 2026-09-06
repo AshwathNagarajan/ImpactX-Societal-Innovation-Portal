@@ -100,6 +100,7 @@ def project_ui(item: dict, institutes_by_id: dict[str, dict], challenges_by_id: 
     technology = proposal.get("technology") or doc.get("technology") or ["Civic Technology"]
     stage = normalize_stage(doc.get("status") or doc.get("stage"))
     stage_detail = current_stage_detail(stage)
+    progress = int(stage_detail.get("progress") or 10)
     return {
         **doc,
         "id": doc.get("project_id") or doc.get("id"),
@@ -109,7 +110,7 @@ def project_ui(item: dict, institutes_by_id: dict[str, dict], challenges_by_id: 
         "support": required_support[0] if isinstance(required_support, list) else str(required_support),
         "technology": technology[0] if isinstance(technology, list) else str(technology),
         "impact": int(doc.get("impact") or 78),
-        "progress": int(doc.get("progress") or 0),
+        "progress": progress,
         "stage": stage_detail["label"],
         "status": stage,
         "current_stage": stage_detail,
@@ -158,7 +159,7 @@ async def public_data() -> dict:
     kpis = [
         ["Total Challenges", f"{len(challenges):,}", "live from MongoDB"],
         ["Validated Challenges", f"{sum(1 for item in challenges if item['status'] == 'Validated'):,}", "approved records"],
-        ["Active Projects", f"{sum(1 for item in projects if item.get('progress', 0) < 100):,}", "live work"],
+        ["Active Projects", f"{sum(1 for item in projects if item.get('status') != 'COMPLETED'):,}", "live work"],
         ["Solutions Implemented", f"{implemented:,}", "completed outcomes"],
         ["Partner Institutes", f"{len(institutes):,}", "registered institutes"],
         ["Industry Partners", f"{len(industries):,}", "registered partners"],

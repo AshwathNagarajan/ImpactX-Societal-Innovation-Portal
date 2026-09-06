@@ -12,7 +12,7 @@ export default function ProfilePage({ type = "institute" }) {
   const focus = record.focus || record.expertise || (isIndustry ? "CSR innovation, pilot deployment and technical mentorship" : "AI, IoT, civil systems and field research");
   const stats = isIndustry
     ? [["Supported Projects", data.projects.length], ["Mentorship Hours", "1,420"], ["Pilot Sites", data.projects.filter((p) => p.status === "PILOT").length]]
-    : [["Active Projects", data.projects.filter((p) => p.progress < 100).length], ["Student Teams", data.teams.length], ["Research Outputs", 11]];
+    : [["Active Projects", data.projects.filter((p) => p.status !== "COMPLETED").length], ["Student Teams", data.teams.length], ["Research Outputs", 11]];
 
   return (
     <div className="min-w-0 space-y-8">
