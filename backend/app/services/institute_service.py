@@ -7,25 +7,75 @@ from app.schemas.institute import ProposalCreate
 from app.services.project_service import create_project
 from app.utils.helpers import utc_now
 from app.utils.serializers import serialize_document
+from app.services.audit_service import record_event
+
+
+def _id_aliases(*values: str | None) -> list:
+    aliases = []
+    for value in values:
+        if not value:
+            continue
+        aliases.append(value)
+        if ObjectId.is_valid(str(value)):
+            aliases.append(ObjectId(str(value)))
+    unique = []
+    for item in aliases:
+        if item not in unique:
+            unique.append(item)
+    return unique
+
+
+async def resolve_institute_for_user(user: dict) -> dict | None:
+    database = get_database()
+    email = user.get("email")
+    if email:
+        institute = await database.institutes.find_one({"email": email})
+        if institute:
+            return institute
+    name = user.get("name")
+    if name:
+        institute = await database.institutes.find_one({"name": {"$regex": name, "$options": "i"}})
+        if institute:
+            return institute
+    return await database.institutes.find_one({})
+
+
+async def institute_identity(user: dict) -> dict:
+    institute = await resolve_institute_for_user(user)
+    org_id = str(institute.get("_id")) if institute else user["id"]
+    return {
+        "org": institute,
+        "org_id": org_id,
+        "aliases": _id_aliases(user.get("id"), org_id),
+        "name": (institute or {}).get("name") or user.get("name") or "Institute",
+    }
 
 
 async def dashboard(user: dict) -> dict:
     database = get_database()
+    identity = await institute_identity(user)
     return {
-        "assigned_challenges": await database.challenges.count_documents({"status": "ASSIGNED"}),
-        "active_projects": await database.projects.count_documents({"status": {"$ne": "COMPLETED"}}),
-        "completed_projects": await database.projects.count_documents({"status": "COMPLETED"}),
+        "assigned_challenges": await database.challenges.count_documents({"status": "ASSIGNED", "assigned_institute_id": {"$in": identity["aliases"]}}),
+        "active_projects": await database.projects.count_documents({"institute_id": {"$in": identity["aliases"]}, "status": {"$ne": "COMPLETED"}}),
+        "completed_projects": await database.projects.count_documents({"institute_id": {"$in": identity["aliases"]}, "status": "COMPLETED"}),
         "user": user,
     }
 
 
-async def assigned_challenges() -> list[dict]:
-    cursor = get_database().challenges.find({"status": {"$in": ["VALIDATED", "ASSIGNED"]}})
+async def assigned_challenges(user: dict) -> list[dict]:
+    identity = await institute_identity(user)
+    cursor = get_database().challenges.find({"status": "ASSIGNED", "assigned_institute_id": {"$in": identity["aliases"]}})
     return [serialize_document(item) async for item in cursor]
 
 
 async def recommended_challenges() -> list[dict]:
     cursor = get_database().challenges.find({"status": "VALIDATED"}).limit(20)
+    return [serialize_document(item) async for item in cursor]
+
+
+async def assignment_requests_for_user(user: dict) -> list[dict]:
+    identity = await institute_identity(user)
+    cursor = get_database().assignment_requests.find({"institute_id": {"$in": identity["aliases"]}}).sort("created_at", -1).limit(20)
     return [serialize_document(item) async for item in cursor]
 
 
@@ -50,34 +100,57 @@ async def ai_recommendations(user: dict) -> list[dict]:
 
 
 async def submit_proposal(payload: ProposalCreate, user: dict) -> dict:
+    database = get_database()
+    identity = await institute_identity(user)
+    challenge = await database.challenges.find_one({"challenge_id": payload.challenge_id})
+    if not challenge:
+        from app.utils.mongo import not_found
+
+        not_found("Challenge not found")
+    if challenge.get("assigned_institute_id") not in identity["aliases"]:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=403, detail="This challenge is not assigned to your institute yet.")
     now = utc_now()
     document = payload.model_dump()
-    document.update({"submitted_by": user["id"], "created_at": now, "updated_at": now, "status": "SUBMITTED"})
-    await get_database().proposals.insert_one(document)
+    document.update({"submitted_by": user["id"], "institute_id": identity["org_id"], "created_at": now, "updated_at": now, "status": "SUBMITTED"})
+    await database.proposals.insert_one(document)
+    await database.projects.update_one(
+        {"challenge_id": payload.challenge_id, "institute_id": {"$in": identity["aliases"]}},
+        {"$set": {"proposal": document, "updated_at": now}},
+    )
+    await record_event("PROPOSAL_SUBMITTED", user, "challenge", payload.challenge_id, {"proposal_id": str(document.get("_id", "")), "need_industry_support": payload.need_industry_support})
     return serialize_document(document)
 
 
 async def accept_challenge(challenge_id: str, user: dict) -> dict:
     database = get_database()
+    identity = await institute_identity(user)
     challenge = await database.challenges.find_one({"challenge_id": challenge_id})
     if not challenge:
         from app.utils.mongo import not_found
 
         not_found("Challenge not found")
-    existing_project = await database.projects.find_one({"challenge_id": challenge_id, "institute_id": user["id"]})
+    assigned_to = challenge.get("assigned_institute_id")
+    if assigned_to and assigned_to not in identity["aliases"]:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=403, detail="This challenge is assigned to another institute.")
+    existing_project = await database.projects.find_one({"challenge_id": challenge_id, "institute_id": {"$in": identity["aliases"]}})
     await database.challenges.update_one(
         {"challenge_id": challenge_id},
-        {"$set": {"status": "ASSIGNED", "assigned_institute_id": user["id"], "updated_at": utc_now()}},
+        {"$set": {"status": "ASSIGNED", "assigned_institute_id": identity["org_id"], "updated_at": utc_now()}},
     )
     project = serialize_document(existing_project) if existing_project else await create_project(
         ProjectCreate(
             challenge_id=challenge_id,
-            institute_id=user["id"],
+            institute_id=identity["org_id"],
             title=f"{challenge.get('title', 'Challenge')} Solution Project",
             status="PLANNING",
             proposal={"source": "Institute acceptance", "ai_suggestions_available": bool(challenge.get("ai_analysis", {}).get("proposed_solution_directions"))},
         )
     )
+    await record_event("CHALLENGE_ACCEPTED_BY_INSTITUTE", user, "challenge", challenge_id, {"project_id": project.get("project_id"), "institute_id": identity["org_id"]})
     return {"success": True, "message": "Challenge accepted and project workspace created.", "project": project}
 
 
@@ -90,6 +163,7 @@ async def reject_challenge(challenge_id: str, user: dict) -> dict:
 
 async def request_assignment(challenge_id: str, user: dict) -> dict:
     database = get_database()
+    identity = await institute_identity(user)
     challenge = await database.challenges.find_one({"challenge_id": challenge_id})
     if not challenge:
         from app.utils.mongo import not_found
@@ -100,20 +174,21 @@ async def request_assignment(challenge_id: str, user: dict) -> dict:
         "type": "INSTITUTE_ASSIGNMENT_REQUEST",
         "challenge_id": challenge_id,
         "institute_user_id": user["id"],
-        "institute_name": user.get("name"),
+        "institute_id": identity["org_id"],
+        "institute_name": identity["name"],
         "status": "REQUESTED",
         "created_at": now,
         "updated_at": now,
     }
     await database.assignment_requests.update_one(
-        {"challenge_id": challenge_id, "institute_user_id": user["id"], "status": "REQUESTED"},
+        {"challenge_id": challenge_id, "institute_id": identity["org_id"], "status": "REQUESTED"},
         {"$setOnInsert": document},
         upsert=True,
     )
     await database.notifications.insert_one(
         {
             "title": "Institute assignment requested",
-            "message": f"{user.get('name', 'Institute')} requested assignment for {challenge.get('title', challenge_id)}.",
+            "message": f"{identity['name']} requested assignment for {challenge.get('title', challenge_id)}.",
             "role": "ADMIN",
             "entity_type": "challenge",
             "entity_id": challenge_id,
@@ -121,11 +196,13 @@ async def request_assignment(challenge_id: str, user: dict) -> dict:
             "created_at": now,
         }
     )
+    await record_event("ASSIGNMENT_REQUESTED", user, "challenge", challenge_id, {"institute_id": identity["org_id"], "institute_name": identity["name"]})
     return {"success": True, "message": "Assignment request sent to admin for validation."}
 
 
 async def projects(user: dict) -> list[dict]:
-    cursor = get_database().projects.find({"institute_id": {"$in": [user["id"], ObjectId(user["id"]) if ObjectId.is_valid(user["id"]) else user["id"]]}})
+    identity = await institute_identity(user)
+    cursor = get_database().projects.find({"institute_id": {"$in": identity["aliases"]}})
     return [serialize_document(item) async for item in cursor]
 
 

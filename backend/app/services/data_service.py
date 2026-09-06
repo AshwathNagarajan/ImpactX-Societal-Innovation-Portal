@@ -141,9 +141,14 @@ def chart_bundle(challenges: list[dict], institutes: list[dict], industries: lis
     }
 
 
-def funding_summary(projects: list[dict], industries: list[dict]) -> dict:
+def funding_summary(projects: list[dict], industries: list[dict], partnerships: list[dict] | None = None) -> dict:
+    partnerships = partnerships or []
     committed = sum(int(item.get("funding_committed") or 0) for item in industries)
     utilized = sum(int(item.get("funding_utilized") or 0) for item in industries)
+    active_partnerships = [item for item in partnerships if item.get("status") == "ACTIVE"]
+    pledged = sum(int(item.get("funding_amount") or 0) for item in active_partnerships)
+    project_funding = sum(int(item.get("funding_amount") or 0) for item in projects)
+    utilized += max(pledged, project_funding)
     funded_projects = [
         item
         for item in projects
@@ -166,6 +171,8 @@ def funding_summary(projects: list[dict], industries: list[dict]) -> dict:
             }
             for item in industries
         ],
+        "pending_offers": sum(1 for item in partnerships if item.get("status") == "PENDING_REVIEW"),
+        "partnerships": [serialize_document(item) for item in partnerships],
     }
 
 
@@ -175,6 +182,7 @@ async def public_data() -> dict:
     institutes_raw = [item async for item in database.institutes.find({})]
     industries_raw = [item async for item in database.industries.find({})]
     projects_raw = [item async for item in database.projects.find({})]
+    partnerships_raw = [item async for item in database.partnerships.find({})]
     teams_raw = [serialize_document(item) async for item in database.teams.find({})]
     institutes_by_id = {str(item.get("_id")): item for item in institutes_raw}
     challenges_by_id = {item.get("challenge_id"): item for item in challenges_raw}
@@ -207,5 +215,5 @@ async def public_data() -> dict:
         "statuses": STATUSES,
         "priorities": PRIORITIES,
         "supportTypes": SUPPORT_TYPES,
-        "funding": funding_summary(projects_raw, industries_raw),
+        "funding": funding_summary(projects_raw, industries_raw, partnerships_raw),
     }

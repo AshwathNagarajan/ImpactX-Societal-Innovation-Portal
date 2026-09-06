@@ -1,4 +1,6 @@
 import asyncio
+import os
+import sys
 from datetime import datetime, timezone
 
 from app.core.database import close_mongo_connection, connect_to_mongo, get_database
@@ -243,6 +245,7 @@ async def seed() -> None:
     await connect_to_mongo()
     database = get_database()
     now = datetime.now(timezone.utc)
+    allow_demo_reset = os.getenv("IMPACTX_ALLOW_DEMO_RESET") == "true" or "--confirm-demo-reset" in sys.argv
 
     for user in DEMO_USERS:
         await database.users.update_one(
@@ -261,8 +264,9 @@ async def seed() -> None:
             upsert=True,
         )
 
-    await database.institutes.delete_many({"name": {"$nin": [item["name"] for item in INSTITUTES]}})
-    await database.industries.delete_many({"name": {"$nin": [item["name"] for item in INDUSTRIES]}})
+    if allow_demo_reset:
+        await database.institutes.delete_many({"name": {"$nin": [item["name"] for item in INSTITUTES]}})
+        await database.industries.delete_many({"name": {"$nin": [item["name"] for item in INDUSTRIES]}})
 
     for item in INSTITUTES:
         await database.institutes.update_one({"name": item["name"]}, {"$set": {**item, "updated_at": now}, "$setOnInsert": {"created_at": now}}, upsert=True)
@@ -281,7 +285,8 @@ async def seed() -> None:
     if documents:
         vector_store.build(documents)
     await close_mongo_connection()
-    print("Seed data and RAG vector index generated.")
+    mode = "demo reset" if allow_demo_reset else "safe upsert"
+    print(f"Seed data and RAG vector index generated ({mode} mode).")
 
 
 if __name__ == "__main__":

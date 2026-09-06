@@ -4,6 +4,7 @@ export const instituteService = {
   dashboard: () => api.get("/institute/dashboard").then((res) => res.data),
   assignedChallenges: () => api.get("/institute/assigned-challenges").then((res) => res.data),
   recommendedChallenges: () => api.get("/institute/recommended-challenges").then((res) => res.data),
+  assignmentRequests: () => api.get("/institute/assignment-requests").then((res) => res.data),
   aiRecommendations: () => api.get("/institute/recommendations").then((res) => res.data),
   acceptChallenge: (challengeId) => api.post(`/institute/challenges/${challengeId}/accept`).then((res) => res.data),
   requestAssignment: (challengeId) => api.post(`/institute/challenges/${challengeId}/request-assignment`).then((res) => res.data),

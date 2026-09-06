@@ -18,6 +18,7 @@ import Industries from "../pages/admin/Industries.jsx";
 import Matching from "../pages/admin/Matching.jsx";
 import Projects from "../pages/admin/Projects.jsx";
 import AdminAnalytics from "../pages/admin/AdminAnalytics.jsx";
+import AdminSettings from "../pages/admin/AdminSettings.jsx";
 import InstituteDashboard from "../pages/institute/InstituteDashboard.jsx";
 import AssignedChallenges from "../pages/institute/AssignedChallenges.jsx";
 import DiscoverChallenges from "../pages/institute/DiscoverChallenges.jsx";
@@ -70,7 +71,7 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login/>}/>
     </Route>
     <Route path="/admin" element={<RequireRole role="admin"><DashboardLayout title="Government Admin" items={adminItems}/></RequireRole>}>
-      <Route index element={<AdminDashboard/>}/><Route path="challenges" element={<Challenges/>}/><Route path="validation" element={<ValidationQueue/>}/><Route path="review/:id" element={<ChallengeReview/>}/><Route path="institutes" element={<Institutes/>}/><Route path="industries" element={<Industries/>}/><Route path="matching" element={<Matching/>}/><Route path="projects" element={<Projects/>}/><Route path="analytics" element={<AdminAnalytics/>}/><Route path="impact" element={<AdminAnalytics/>}/><Route path="notifications" element={<Utility title="Admin Notifications"/>}/><Route path="settings" element={<Utility title="Admin Settings"/>}/>
+      <Route index element={<AdminDashboard/>}/><Route path="challenges" element={<Challenges/>}/><Route path="validation" element={<ValidationQueue/>}/><Route path="review/:id" element={<ChallengeReview/>}/><Route path="institutes" element={<Institutes/>}/><Route path="industries" element={<Industries/>}/><Route path="matching" element={<Matching/>}/><Route path="projects" element={<Projects/>}/><Route path="analytics" element={<AdminAnalytics/>}/><Route path="impact" element={<AdminAnalytics/>}/><Route path="notifications" element={<Utility title="Admin Notifications"/>}/><Route path="settings" element={<AdminSettings/>}/>
     </Route>
     <Route path="/institute" element={<RequireRole role="institute"><DashboardLayout title="Institute Workspace" items={instituteItems}/></RequireRole>}>
       <Route index element={<InstituteDashboard/>}/><Route path="assigned" element={<AssignedChallenges/>}/><Route path="discover" element={<DiscoverChallenges/>}/><Route path="projects" element={<InstituteProjects/>}/><Route path="projects/:id" element={<ProjectPage/>}/><Route path="teams" element={<TeamManagement/>}/><Route path="proposals" element={<Proposal/>}/><Route path="mentors" element={<Utility title="Mentors" variant="mentor"/>}/><Route path="milestones" element={<Utility title="Milestones" variant="milestone"/>}/><Route path="research" element={<Utility title="Research Output" variant="research"/>}/><Route path="impact" element={<AdminAnalytics/>}/><Route path="notifications" element={<Utility title="Institute Notifications"/>}/><Route path="profile" element={<ProfilePage type="institute"/>}/>

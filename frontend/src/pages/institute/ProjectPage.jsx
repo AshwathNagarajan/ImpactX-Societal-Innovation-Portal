@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import NextActionsCard from "../../components/ai/NextActionsCard.jsx";
+import CommentThread from "../../components/comments/CommentThread.jsx";
 import ProjectHealthCard from "../../components/ai/ProjectHealthCard.jsx";
 import ProjectLifecycle from "../../components/ai/ProjectLifecycle.jsx";
 import ProgressBar from "../../components/common/ProgressBar.jsx";
@@ -67,6 +68,8 @@ export default function ProjectPage() {
           </div>
         ))}
       </div>
+
+      <CommentThread entityType="project" entityId={p.id} title="Project Discussion" />
     </div>
   );
 }

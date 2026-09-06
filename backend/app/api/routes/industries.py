@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.core.dependencies import require_industry
-from app.schemas.industry import PartnershipCreate
+from app.schemas.industry import PartnershipCreate, ProjectSupportRequest
 from app.services import industry_service
 
 router = APIRouter(prefix="/industry", tags=["Industry"])
@@ -33,8 +33,8 @@ async def create_partnership(payload: PartnershipCreate, user=Depends(require_in
 
 
 @router.post("/projects/{project_id}/support")
-async def support_project(project_id: str, user=Depends(require_industry)):
-    return await industry_service.support_project(project_id, user)
+async def support_project(project_id: str, payload: ProjectSupportRequest = ProjectSupportRequest(), user=Depends(require_industry)):
+    return await industry_service.support_project(project_id, payload, user)
 
 
 @router.put("/partnerships/{partnership_id}")

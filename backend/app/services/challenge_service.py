@@ -7,6 +7,7 @@ from app.schemas.challenge import ChallengeCreate
 from app.utils.helpers import normalize_status, utc_now
 from app.utils.mongo import not_found
 from app.utils.serializers import serialize_document
+from app.services.audit_service import record_event
 from app.services.notification_service import create_notification
 
 
@@ -75,6 +76,7 @@ async def create_challenge(payload: ChallengeCreate) -> dict:
         }
     )
     await get_database().challenges.insert_one(document)
+    await record_event("CHALLENGE_SUBMITTED", None, "challenge", document["challenge_id"], {"title": document["title"], "priority": priority})
     await link_attachment_records(document)
     if priority == "CRITICAL":
         await create_notification("Critical challenge requires validation", document["title"], role="ADMIN", entity_type="challenge", entity_id=document["challenge_id"])
@@ -120,6 +122,13 @@ async def ai_validate_challenge(challenge_id: str) -> dict:
             },
         )
         updated = await database.challenges.find_one({"challenge_id": challenge_id})
+        await record_event(
+            "CHALLENGE_AI_VALIDATED" if not is_critical else "CHALLENGE_AI_ESCALATED",
+            None,
+            "challenge",
+            challenge_id,
+            {"status": status, "validation_status": validation_status, "source": analysis.get("audit", {}).get("generation_source")},
+        )
         if is_critical:
             await create_notification("Critical challenge requires admin validation", updated["title"], role="ADMIN", entity_type="challenge", entity_id=challenge_id)
         else:
@@ -138,6 +147,7 @@ async def ai_validate_challenge(challenge_id: str) -> dict:
             },
         )
         updated = await database.challenges.find_one({"challenge_id": challenge_id})
+        await record_event("CHALLENGE_AI_VALIDATION_FAILED", None, "challenge", challenge_id, {"status": "UNDER_REVIEW"})
         await create_notification("Challenge needs admin validation", updated["title"], role="ADMIN", entity_type="challenge", entity_id=challenge_id)
         return serialize_document(updated)
 
@@ -213,12 +223,15 @@ async def pending_challenges() -> list[dict]:
 
 async def approve_challenge(challenge_id: str) -> dict:
     item = await update_challenge(challenge_id, {"status": "VALIDATED"})
+    await record_event("CHALLENGE_APPROVED", None, "challenge", challenge_id, {"title": item.get("title")})
     await create_notification("Challenge validated", item["title"], role="INSTITUTE", entity_type="challenge", entity_id=challenge_id)
     return item
 
 
 async def reject_challenge(challenge_id: str) -> dict:
-    return await update_challenge(challenge_id, {"status": "REJECTED"})
+    item = await update_challenge(challenge_id, {"status": "REJECTED"})
+    await record_event("CHALLENGE_REJECTED", None, "challenge", challenge_id, {"title": item.get("title")})
+    return item
 
 
 async def set_priority(challenge_id: str, priority: str) -> dict:
@@ -226,7 +239,185 @@ async def set_priority(challenge_id: str, priority: str) -> dict:
 
 
 async def assign_institute(challenge_id: str, institute_id: str) -> dict:
-    return await update_challenge(challenge_id, {"assigned_institute_id": institute_id, "status": "ASSIGNED"})
+    item = await update_challenge(challenge_id, {"assigned_institute_id": institute_id, "status": "ASSIGNED"})
+    await record_event("CHALLENGE_ASSIGNED", None, "challenge", challenge_id, {"institute_id": institute_id})
+    return item
+
+
+async def assignment_requests() -> list[dict]:
+    database = get_database()
+    requests = [item async for item in database.assignment_requests.find({"status": "REQUESTED"}).sort("created_at", DESCENDING)]
+    challenge_ids = [item.get("challenge_id") for item in requests]
+    challenges = {
+        item.get("challenge_id"): serialize_document(item)
+        async for item in database.challenges.find({"challenge_id": {"$in": challenge_ids}})
+    }
+    items = []
+    for request in requests:
+        document = serialize_document(request)
+        document["challenge"] = challenges.get(request.get("challenge_id"), {})
+        items.append(document)
+    return items
+
+
+async def approve_assignment_request(request_id: str) -> dict:
+    from bson import ObjectId
+
+    database = get_database()
+    query = {"_id": ObjectId(request_id)} if ObjectId.is_valid(request_id) else {"id": request_id}
+    request = await database.assignment_requests.find_one(query)
+    if not request:
+        not_found("Assignment request not found")
+    if request.get("status") != "REQUESTED":
+        return serialize_document(request)
+    institute_id = request.get("institute_id") or request.get("institute_user_id")
+    challenge_id = request.get("challenge_id")
+    if not institute_id or not challenge_id:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=400, detail="Assignment request is missing institute or challenge details.")
+    assigned = await assign_institute(challenge_id, str(institute_id))
+    await database.assignment_requests.update_one(
+        {"_id": request["_id"]},
+        {"$set": {"status": "APPROVED", "approved_at": utc_now(), "updated_at": utc_now()}},
+    )
+    await create_notification(
+        "Assignment approved",
+        f"{assigned.get('title', challenge_id)} is assigned to your institute.",
+        role="INSTITUTE",
+        entity_type="challenge",
+        entity_id=challenge_id,
+    )
+    return assigned
+
+
+async def update_assignment_request(request_id: str, status: str, comment: str = "", actor: dict | None = None) -> dict:
+    from bson import ObjectId
+
+    database = get_database()
+    normalized = normalize_status(status)
+    if normalized not in {"REJECTED", "ON_HOLD", "REQUESTED"}:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=400, detail="Assignment request status must be rejected, on hold, or requested.")
+    query = {"_id": ObjectId(request_id)} if ObjectId.is_valid(request_id) else {"id": request_id}
+    result = await database.assignment_requests.find_one_and_update(
+        query,
+        {"$set": {"status": normalized, "comment": comment, "updated_at": utc_now()}},
+        return_document=ReturnDocument.AFTER,
+    )
+    if not result:
+        not_found("Assignment request not found")
+    await record_event("ASSIGNMENT_REQUEST_UPDATED", actor, "challenge", result.get("challenge_id", ""), {"status": normalized, "comment": comment})
+    await create_notification(
+        "Assignment request updated",
+        comment or f"Your assignment request is now {normalized.replace('_', ' ').title()}.",
+        role="INSTITUTE",
+        entity_type="challenge",
+        entity_id=result.get("challenge_id", ""),
+    )
+    return serialize_document(result)
+
+
+async def list_proposals(status: str | None = None) -> list[dict]:
+    database = get_database()
+    query = {}
+    if status:
+        query["status"] = normalize_status(status)
+    proposals = [item async for item in database.proposals.find(query).sort("created_at", DESCENDING)]
+    challenge_ids = [item.get("challenge_id") for item in proposals]
+    challenges = {
+        item.get("challenge_id"): serialize_document(item)
+        async for item in database.challenges.find({"challenge_id": {"$in": challenge_ids}})
+    }
+    for proposal in proposals:
+        proposal["challenge"] = challenges.get(proposal.get("challenge_id"), {})
+    return [serialize_document(item) for item in proposals]
+
+
+async def update_proposal_status(proposal_id: str, status: str, comment: str = "", actor: dict | None = None) -> dict:
+    from bson import ObjectId
+
+    database = get_database()
+    normalized = normalize_status(status)
+    if normalized not in {"APPROVED", "REJECTED", "CHANGES_REQUESTED"}:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=400, detail="Proposal status must be approved, rejected, or changes requested.")
+    query = {"_id": ObjectId(proposal_id)} if ObjectId.is_valid(proposal_id) else {"id": proposal_id}
+    result = await database.proposals.find_one_and_update(
+        query,
+        {"$set": {"status": normalized, "review_comment": comment, "reviewed_at": utc_now(), "updated_at": utc_now()}},
+        return_document=ReturnDocument.AFTER,
+    )
+    if not result:
+        not_found("Proposal not found")
+    if normalized == "APPROVED":
+        await database.projects.update_one(
+            {"challenge_id": result.get("challenge_id"), "institute_id": result.get("institute_id")},
+            {"$set": {"proposal_status": "APPROVED", "status": "RESEARCH", "updated_at": utc_now()}},
+        )
+    await record_event("PROPOSAL_STATUS_UPDATED", actor, "challenge", result.get("challenge_id", ""), {"proposal_id": str(result.get("_id")), "status": normalized, "comment": comment})
+    await create_notification(
+        "Proposal review updated",
+        comment or f"Proposal status changed to {normalized.replace('_', ' ').title()}.",
+        role="INSTITUTE",
+        entity_type="challenge",
+        entity_id=result.get("challenge_id", ""),
+    )
+    return serialize_document(result)
+
+
+async def list_support_offers(status: str | None = None) -> list[dict]:
+    database = get_database()
+    query = {}
+    if status:
+        query["status"] = normalize_status(status)
+    offers = [item async for item in database.partnerships.find(query).sort("created_at", DESCENDING)]
+    project_ids = [item.get("project_id") for item in offers]
+    projects = {
+        item.get("project_id"): serialize_document(item)
+        async for item in database.projects.find({"project_id": {"$in": project_ids}})
+    }
+    for offer in offers:
+        offer["project"] = projects.get(offer.get("project_id"), {})
+    return [serialize_document(item) for item in offers]
+
+
+async def update_support_offer_status(offer_id: str, status: str, comment: str = "", actor: dict | None = None) -> dict:
+    from bson import ObjectId
+
+    database = get_database()
+    normalized = normalize_status(status)
+    if normalized not in {"ACTIVE", "REJECTED", "CHANGES_REQUESTED"}:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=400, detail="Support status must be active, rejected, or changes requested.")
+    query = {"_id": ObjectId(offer_id)} if ObjectId.is_valid(offer_id) else {"id": offer_id}
+    existing = await database.partnerships.find_one(query)
+    if not existing:
+        not_found("Support offer not found")
+    result = await database.partnerships.find_one_and_update(
+        query,
+        {"$set": {"status": normalized, "review_comment": comment, "reviewed_at": utc_now(), "updated_at": utc_now()}},
+        return_document=ReturnDocument.AFTER,
+    )
+    if not result:
+        not_found("Support offer not found")
+    if normalized == "ACTIVE" and existing.get("status") != "ACTIVE" and result.get("funding_amount"):
+        await database.projects.update_one(
+            {"project_id": result.get("project_id")},
+            {"$inc": {"funding_amount": int(result.get("funding_amount") or 0)}, "$set": {"updated_at": utc_now()}},
+        )
+    await record_event("SUPPORT_OFFER_STATUS_UPDATED", actor, "project", result.get("project_id", ""), {"status": normalized, "comment": comment})
+    await create_notification(
+        "Support offer updated",
+        comment or f"Industry support status changed to {normalized.replace('_', ' ').title()}.",
+        role="INDUSTRY",
+        entity_type="project",
+        entity_id=result.get("project_id", ""),
+    )
+    return serialize_document(result)
 
 
 async def delete_challenge(challenge_id: str) -> dict:

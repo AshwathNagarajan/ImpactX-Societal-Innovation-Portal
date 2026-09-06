@@ -101,6 +101,7 @@ async def _generate_with_router_chat(challenge: Dict[str, Any], context: List[Di
         f"SOURCE: {item.get('source')} | TYPE: {item.get('type')} | SCORE: {item.get('score'):.3f}\n{item.get('text')}"
         for item in context
     )
+    challenge_for_prompt = _challenge_for_prompt(challenge)
     system_prompt = (
         "You are the AI analysis engine for IMPACTX, a societal innovation collaboration platform. "
         "Ground your analysis only in the challenge information and retrieved context. "
@@ -171,7 +172,7 @@ async def check_huggingface_generation() -> Dict[str, Any]:
     result = await generate_structured_analysis(probe, [])
     return {
         "configured": True,
-        "reachable": result.get("_generation_source") == "huggingface",
+        "reachable": result.get("_generation_source") in {"huggingface", "huggingface_router"},
         "model": settings.hf_generation_model,
         "source": result.get("_generation_source"),
         "fallback_reason": result.get("_fallback_reason"),
@@ -243,4 +244,3 @@ def fallback_generation(challenge: Dict[str, Any], context: List[Dict[str, Any]]
         "_generation_model": "deterministic_rules",
         "_fallback_reason": reason,
     }
-    challenge_for_prompt = _challenge_for_prompt(challenge)

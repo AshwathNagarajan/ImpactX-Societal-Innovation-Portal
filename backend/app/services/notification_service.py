@@ -4,12 +4,18 @@ from app.utils.serializers import serialize_document
 
 
 async def create_notification(title: str, message: str, role: str = "ALL", entity_type: str = "", entity_id: str = "") -> dict:
+    link = ""
+    if entity_type == "challenge" and entity_id:
+        link = f"/challenges/{entity_id}"
+    elif entity_type == "project" and entity_id:
+        link = f"/institute/projects/{entity_id}"
     document = {
         "title": title,
         "message": message,
         "role": role,
         "entity_type": entity_type,
         "entity_id": entity_id,
+        "link": link,
         "read": False,
         "created_at": utc_now(),
     }

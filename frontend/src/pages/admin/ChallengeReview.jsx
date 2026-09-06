@@ -4,6 +4,7 @@ import AIAnalysisCard from "../../components/ai/AIAnalysisCard.jsx";
 import SimilarChallengeCard from "../../components/ai/SimilarChallengeCard.jsx";
 import SolutionSuggestionCard from "../../components/ai/SolutionSuggestionCard.jsx";
 import InstituteCard from "../../components/dashboard/InstituteCard.jsx";
+import EvidenceViewer from "../../components/evidence/EvidenceViewer.jsx";
 import { aiService } from "../../services/aiService.js";
 import { adminService } from "../../services/adminService.js";
 import { challengeService } from "../../services/challengeService.js";
@@ -125,6 +126,7 @@ export default function ChallengeReview() {
               <Info k="People affected" v={challenge.people_affected?.toLocaleString?.() || "Not provided"} />
             </div>
           </section>
+          <EvidenceViewer items={challenge.attachments || []} />
           <AIAnalysisCard analysis={analysis} />
           <Grid title="Similar Challenges" empty="No live duplicate signals returned yet.">{similar.slice(0, 3).map((item) => <SimilarChallengeCard key={item.challenge_id || item.title} challenge={item} />)}</Grid>
           <Grid title="AI Suggested Approaches" empty="No live solution directions returned yet.">{solutions.slice(0, 3).map((item) => <SolutionSuggestionCard key={item.title} solution={item} />)}</Grid>

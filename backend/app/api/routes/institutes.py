@@ -14,12 +14,17 @@ async def dashboard(user=Depends(require_institute)):
 
 @router.get("/assigned-challenges")
 async def assigned_challenges(user=Depends(require_institute)):
-    return {"success": True, "items": await institute_service.assigned_challenges()}
+    return {"success": True, "items": await institute_service.assigned_challenges(user)}
 
 
 @router.get("/recommended-challenges")
 async def recommended_challenges(user=Depends(require_institute)):
     return {"success": True, "items": await institute_service.recommended_challenges()}
+
+
+@router.get("/assignment-requests")
+async def assignment_requests(user=Depends(require_institute)):
+    return {"success": True, "items": await institute_service.assignment_requests_for_user(user)}
 
 
 @router.get("/recommendations")

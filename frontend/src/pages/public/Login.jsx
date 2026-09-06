@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Building2, CheckCircle2, Factory, LockKeyhole, Mail, Shield, Sparkles } from "lucide-react";
 import { loginWithApi } from "../../services/authService.js";
 import { credentials, rolePath, saveUser } from "../../utils/auth.js";
+import { apiErrorMessage } from "../../utils/apiError.js";
 
 const roles = [
   { id: "admin", label: "Admin", description: "Review, validate, assign", icon: Shield },
@@ -49,9 +50,9 @@ export default function Login() {
       if (!err?.response) {
         setError("Backend is not reachable. Start the API on port 8000 or check API_URL.");
       } else if (err.response.status >= 500) {
-        setError(err?.response?.data?.message || "Backend auth service failed. Check Render logs and MongoDB environment variables.");
+        setError(apiErrorMessage(err, "Backend auth service failed. Check Render logs and MongoDB environment variables."));
       } else {
-        setError(err?.response?.data?.message || err?.response?.data?.detail || "Unable to sign in with backend credentials.");
+        setError(apiErrorMessage(err, "Unable to sign in with backend credentials."));
       }
     } finally {
       setBusy(false);
