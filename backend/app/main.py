@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.router import api_router
 from app.core.config import settings
-from app.core.database import close_mongo_connection, connect_to_mongo
+from app.core.database import close_mongo_connection, connect_to_mongo, database_health
 
 logging.basicConfig(level=logging.INFO)
 
@@ -54,7 +54,20 @@ async def root():
 
 @app.get("/api/health")
 async def health():
-    return {"status": "healthy", "service": "IMPACTX API", "environment": settings.app_env}
+    database = await database_health()
+    return {
+        "status": "healthy" if database["ok"] else "degraded",
+        "service": "IMPACTX API",
+        "environment": settings.app_env,
+        "database": database,
+        "configuration": {
+            "frontend_url": settings.frontend_url,
+            "cors_origins": settings.cors_origins,
+            "huggingface_configured": bool(settings.huggingface_token),
+            "hf_generation_model": settings.hf_generation_model,
+            "hf_embedding_model": settings.hf_embedding_model,
+        },
+    }
 
 
 app.include_router(api_router)

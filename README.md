@@ -110,7 +110,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 FRONTEND_URL=<temporary Vercel URL first, then final Vercel URL>
 CORS_ORIGINS_CSV=http://localhost:5173,http://127.0.0.1:5173,<final Vercel URL>
 HUGGINGFACE_TOKEN=<optional>
-HF_GENERATION_MODEL=google/flan-t5-base
+HF_GENERATION_MODEL=Qwen/Qwen2.5-0.5B-Instruct
 HF_EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 ```
 

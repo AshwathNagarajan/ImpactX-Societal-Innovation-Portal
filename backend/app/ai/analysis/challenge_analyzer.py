@@ -135,6 +135,9 @@ async def analyze_challenge_intelligence(
         audit={
             "model": settings.hf_generation_model,
             "embedding_model": settings.hf_embedding_model,
+            "generation_source": generated.get("_generation_source", "unknown"),
+            "generation_model": generated.get("_generation_model", settings.hf_generation_model),
+            "fallback_reason": generated.get("_fallback_reason"),
             "generated_at": now.isoformat(),
             "confidence": confidence,
             "analysis_version": analysis_version,
@@ -142,4 +145,3 @@ async def analyze_challenge_intelligence(
         },
     )
     return analysis
-

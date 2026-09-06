@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.core.dependencies import get_current_user, require_admin
+from app.rag.generator import check_huggingface_generation
 from app.services.ai_service import (
     analyze_and_store,
     generate_roadmap,
@@ -15,6 +16,11 @@ from app.services.ai_service import (
 )
 
 router = APIRouter(prefix="/ai", tags=["AI"])
+
+
+@router.get("/health")
+async def ai_health(user=Depends(require_admin)):
+    return {"success": True, "data": await check_huggingface_generation()}
 
 
 @router.post("/analyze/{challenge_id}")

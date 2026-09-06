@@ -60,6 +60,38 @@ def get_database() -> AsyncIOMotorDatabase:
     return db.database
 
 
+def is_database_configured() -> bool:
+    return bool(settings.mongodb_uri)
+
+
+def is_database_connected() -> bool:
+    return db.database is not None
+
+
+async def database_health() -> dict:
+    status = {
+        "configured": is_database_configured(),
+        "connected": is_database_connected(),
+        "database": settings.mongodb_database,
+    }
+    if not status["configured"]:
+        status["ok"] = False
+        status["message"] = "MONGODB_URI is not configured."
+        return status
+    if not status["connected"]:
+        status["ok"] = False
+        status["message"] = "MongoDB client is not connected."
+        return status
+    try:
+        await db.client.admin.command("ping")
+        status["ok"] = True
+        status["message"] = "MongoDB connection is healthy."
+    except PyMongoError as exc:
+        status["ok"] = False
+        status["message"] = exc.__class__.__name__
+    return status
+
+
 async def ensure_indexes() -> None:
     database = get_database()
     await database.users.create_index("email", unique=True)

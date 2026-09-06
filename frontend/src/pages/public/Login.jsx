@@ -48,6 +48,8 @@ export default function Login() {
     } catch (err) {
       if (!err?.response) {
         setError("Backend is not reachable. Start the API on port 8000 or check API_URL.");
+      } else if (err.response.status >= 500) {
+        setError(err?.response?.data?.message || "Backend auth service failed. Check Render logs and MongoDB environment variables.");
       } else {
         setError(err?.response?.data?.message || err?.response?.data?.detail || "Unable to sign in with backend credentials.");
       }
