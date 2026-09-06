@@ -82,7 +82,7 @@ async def transition_project(project_id: str, payload: ProjectTransitionRequest,
     target = normalize_stage(payload.target_status)
     if not validate_transition(current, target):
         raise HTTPException(status_code=400, detail=f"Transition from {current} to {target} is not allowed.")
-    event = {"from": current, "to": target, "note": payload.note, "changed_by": user.get("id"), "timestamp": utc_now()}
+    event = {"from": current, "to": target, "note": payload.note, "evidence_ids": payload.evidence_ids, "changed_by": user.get("id"), "timestamp": utc_now()}
     target_detail = current_stage_detail(target)
     await database.projects.update_one(
         {"project_id": project_id},
@@ -94,6 +94,7 @@ async def transition_project(project_id: str, payload: ProjectTransitionRequest,
                 "updated_at": utc_now(),
             },
             "$push": {"status_history": event},
+            "$addToSet": {"evidence_ids": {"$each": payload.evidence_ids}},
         },
     )
     updated = await database.projects.find_one({"project_id": project_id})

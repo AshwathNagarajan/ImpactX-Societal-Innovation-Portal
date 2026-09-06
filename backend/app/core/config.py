@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     huggingface_token: str = ""
     hf_generation_model: str = "Qwen/Qwen3-4B-Instruct-2507"
+    hf_ocr_model: str = "Qwen/Qwen3-VL-30B-A3B-Instruct"
     hf_embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
     frontend_url: str = "http://localhost:5173"

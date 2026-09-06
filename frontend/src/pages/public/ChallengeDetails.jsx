@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { challengeService } from "../../services/challengeService.js";
 import { useImpactData } from "../../hooks/useImpactData.js";
@@ -10,16 +11,31 @@ import Timeline from "../../components/challenges/Timeline.jsx";
 import InstituteCard from "../../components/dashboard/InstituteCard.jsx";
 import IndustryCard from "../../components/dashboard/IndustryCard.jsx";
 import ProgressBar from "../../components/common/ProgressBar.jsx";
+import { getUser } from "../../utils/auth.js";
+import { instituteService } from "../../services/instituteService.js";
 const steps = ["Submitted","AI Analysis","Government Validation","Institute Matching","Solution Development","Industry Collaboration","Pilot","Implementation","Impact"];
 export default function ChallengeDetails() {
   const { id } = useParams();
   const { data } = useImpactData();
+  const user = getUser();
   const [record, setRecord] = useState(null);
+  const [assignmentState, setAssignmentState] = useState({ busy: false, message: "", error: "" });
   useEffect(() => { challengeService.get(id).then(res => setRecord(toUi(res.data))).catch(() => setRecord(null)); }, [id]);
   const c = record || data.challenges.find(x => x.id === id) || data.challenges[0];
   if (!c) return <div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 md:py-12 lg:px-10 xl:px-12"><div className="rounded-3xl border bg-white p-8 shadow-sm">Loading database record...</div></div>;
+  const isInstitute = user?.role === "institute";
+  const isAssignedToInstitute = isInstitute && c.assigned_institute_id && String(c.assigned_institute_id) === String(user.id);
+  const requestAssignment = async () => {
+    setAssignmentState({ busy: true, message: "", error: "" });
+    try {
+      const response = await instituteService.requestAssignment(c.id);
+      setAssignmentState({ busy: false, message: response.message || "Assignment request sent to admin.", error: "" });
+    } catch (err) {
+      setAssignmentState({ busy: false, message: "", error: err?.response?.data?.message || err?.response?.data?.detail || "Unable to request assignment." });
+    }
+  };
   return <div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 md:py-12 lg:px-10 xl:px-12">
-    <div className="rounded-3xl border bg-white p-6 shadow-sm md:p-8"><div className="flex flex-wrap justify-between gap-5"><div className="min-w-0"><p className="text-sm font-semibold text-blue">{c.id}</p><h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight text-navy md:text-4xl">{c.title}</h1></div><div className="flex flex-wrap gap-2"><StatusBadge status={c.status}/><PriorityBadge priority={c.priority}/></div></div><p className="mt-6 max-w-4xl text-sm leading-7 text-slate-600 md:text-base">{c.description}</p><div className="mt-8 grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4"><Info k="Category" v={c.category}/><Info k="Location" v={`${c.city}, ${c.district}`}/><Info k="Submitted" v={c.date}/><Info k="People affected" v={Number(c.affected).toLocaleString()}/><Info k="Submitted by" v={c.submitter}/><Info k="Priority" v={c.priority}/></div></div>
+    <div className="rounded-3xl border bg-white p-6 shadow-sm md:p-8"><div className="flex flex-wrap justify-between gap-5"><div className="min-w-0"><p className="text-sm font-semibold text-blue">{c.id}</p><h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight text-navy md:text-4xl">{c.title}</h1></div><div className="flex flex-wrap gap-2"><StatusBadge status={c.status}/><PriorityBadge priority={c.priority}/></div></div><p className="mt-6 max-w-4xl text-sm leading-7 text-slate-600 md:text-base">{c.description}</p>{isInstitute&&<div className="mt-7 rounded-2xl border border-blue/20 bg-blue/10 p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm font-semibold text-slate-100">{isAssignedToInstitute?"This challenge is assigned to your institute. Submit a proposal to move solution planning forward.":"This challenge is not assigned to your institute yet. Request assignment from the admin review team."}</p>{isAssignedToInstitute?<Link to="/institute/proposals" className="impact-gradient min-h-11 rounded-xl px-5 py-3 text-center text-sm font-semibold text-white">Propose Solution</Link>:<button disabled={assignmentState.busy} onClick={requestAssignment} className="impact-gradient min-h-11 rounded-xl px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">{assignmentState.busy?"Requesting...":"Request Assignment"}</button>}</div>{assignmentState.message&&<p className="mt-3 text-sm font-semibold text-green">{assignmentState.message}</p>}{assignmentState.error&&<p className="mt-3 text-sm font-semibold text-red-300">{assignmentState.error}</p>}</div>}<div className="mt-8 grid gap-4 text-sm md:grid-cols-2 lg:grid-cols-4"><Info k="Category" v={c.category}/><Info k="Location" v={`${c.city}, ${c.district}`}/><Info k="Submitted" v={c.date}/><Info k="People affected" v={Number(c.affected).toLocaleString()}/><Info k="Submitted by" v={c.submitter}/><Info k="Priority" v={c.priority}/></div></div>
     <section className="mt-8 rounded-3xl border bg-white p-6 shadow-sm md:p-8"><h2 className="mb-6 text-xl font-semibold text-navy md:text-2xl">Status Timeline</h2><Timeline steps={steps}/></section>
     <div className="mt-8 grid gap-8 lg:grid-cols-[.9fr_1.1fr]">
       <AIAnalysisCard analysis={c.ai_analysis || fallbackAnalysis(c)} compact />

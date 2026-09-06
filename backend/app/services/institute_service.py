@@ -88,6 +88,42 @@ async def reject_challenge(challenge_id: str, user: dict) -> dict:
     return {"success": True, "message": "Challenge rejection noted."}
 
 
+async def request_assignment(challenge_id: str, user: dict) -> dict:
+    database = get_database()
+    challenge = await database.challenges.find_one({"challenge_id": challenge_id})
+    if not challenge:
+        from app.utils.mongo import not_found
+
+        not_found("Challenge not found")
+    now = utc_now()
+    document = {
+        "type": "INSTITUTE_ASSIGNMENT_REQUEST",
+        "challenge_id": challenge_id,
+        "institute_user_id": user["id"],
+        "institute_name": user.get("name"),
+        "status": "REQUESTED",
+        "created_at": now,
+        "updated_at": now,
+    }
+    await database.assignment_requests.update_one(
+        {"challenge_id": challenge_id, "institute_user_id": user["id"], "status": "REQUESTED"},
+        {"$setOnInsert": document},
+        upsert=True,
+    )
+    await database.notifications.insert_one(
+        {
+            "title": "Institute assignment requested",
+            "message": f"{user.get('name', 'Institute')} requested assignment for {challenge.get('title', challenge_id)}.",
+            "role": "ADMIN",
+            "entity_type": "challenge",
+            "entity_id": challenge_id,
+            "read": False,
+            "created_at": now,
+        }
+    )
+    return {"success": True, "message": "Assignment request sent to admin for validation."}
+
+
 async def projects(user: dict) -> list[dict]:
     cursor = get_database().projects.find({"institute_id": {"$in": [user["id"], ObjectId(user["id"]) if ObjectId.is_valid(user["id"]) else user["id"]]}})
     return [serialize_document(item) async for item in cursor]

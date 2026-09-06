@@ -6,6 +6,6 @@ export const projectService = {
   lifecycle: (projectId) => api.get(`/projects/${projectId}/lifecycle`).then((res) => res.data),
   create: (payload) => api.post("/projects", payload).then((res) => res.data),
   update: (projectId, payload) => api.put(`/projects/${projectId}`, payload).then((res) => res.data),
-  transition: (projectId, targetStatus, note = "") => api.post(`/projects/${projectId}/transition`, { target_status: targetStatus, note }).then((res) => res.data),
+  transition: (projectId, targetStatus, note = "", evidenceIds = []) => api.post(`/projects/${projectId}/transition`, { target_status: targetStatus, note, evidence_ids: evidenceIds }).then((res) => res.data),
   advance: (projectId, note = "") => api.post(`/projects/${projectId}/advance`, { note }).then((res) => res.data),
 };

@@ -37,6 +37,11 @@ async def reject_challenge(challenge_id: str, user=Depends(require_institute)):
     return await institute_service.reject_challenge(challenge_id, user)
 
 
+@router.post("/challenges/{challenge_id}/request-assignment")
+async def request_assignment(challenge_id: str, user=Depends(require_institute)):
+    return await institute_service.request_assignment(challenge_id, user)
+
+
 @router.post("/proposals")
 async def submit_proposal(payload: ProposalCreate, user=Depends(require_institute)):
     return {"success": True, "data": await institute_service.submit_proposal(payload, user)}

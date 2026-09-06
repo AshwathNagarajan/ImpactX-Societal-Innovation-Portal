@@ -17,6 +17,7 @@ class ProjectCreate(BaseModel):
 class ProjectTransitionRequest(BaseModel):
     target_status: str
     note: str = ""
+    evidence_ids: List[str] = []
 
 
 class ProjectOut(ProjectCreate):

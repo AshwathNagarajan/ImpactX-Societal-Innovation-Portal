@@ -12,6 +12,7 @@ def build_prompt(challenge: Dict[str, Any], context: List[Dict[str, Any]]) -> st
         f"SOURCE: {item.get('source')} | TYPE: {item.get('type')} | SCORE: {item.get('score'):.3f}\n{item.get('text')}"
         for item in context
     )
+    challenge_for_prompt = _challenge_for_prompt(challenge)
     system_prompt = (
         "You are the AI analysis engine for IMPACTX, a societal innovation collaboration platform. "
         "Ground your analysis only in the challenge information and retrieved context. "
@@ -23,7 +24,7 @@ CONTEXT:
 {context_text or "No retrieved context available."}
 
 CHALLENGE:
-{json.dumps(challenge, ensure_ascii=False, default=str)}
+{json.dumps(challenge_for_prompt, ensure_ascii=False, default=str)}
 
 TASK:
 Return a JSON object with these keys:
@@ -40,7 +41,7 @@ CONTEXT:
 {context_text or "No retrieved context available."}
 
 CHALLENGE:
-{json.dumps(challenge, ensure_ascii=False, default=str)}
+{json.dumps(challenge_for_prompt, ensure_ascii=False, default=str)}
 
 TASK:
 Return JSON with summary, category, subcategory, priority_score, priority_level,
@@ -111,7 +112,7 @@ CONTEXT:
 {context_text or "No retrieved context available."}
 
 CHALLENGE:
-{json.dumps(challenge, ensure_ascii=False, default=str)}
+{json.dumps(challenge_for_prompt, ensure_ascii=False, default=str)}
 
 TASK:
 Return a JSON object with these keys:
@@ -187,6 +188,23 @@ def _generated_text(payload: Any) -> str:
     return str(payload)
 
 
+def _challenge_for_prompt(challenge: Dict[str, Any]) -> Dict[str, Any]:
+    sanitized = dict(challenge)
+    evidence_summary = []
+    for item in sanitized.get("attachments", []) or []:
+        evidence_summary.append(
+            {
+                "evidence_id": item.get("evidence_id"),
+                "original_name": item.get("original_name"),
+                "content_type": item.get("content_type"),
+                "ocr_status": item.get("ocr_status"),
+                "ocr_text": item.get("ocr_text", "")[:2500],
+            }
+        )
+    sanitized["attachments"] = evidence_summary
+    return sanitized
+
+
 def _extract_json_object(text: str) -> str:
     cleaned = re.sub(r"```(?:json)?|```", "", text or "", flags=re.IGNORECASE).strip()
     start = cleaned.find("{")
@@ -225,3 +243,4 @@ def fallback_generation(challenge: Dict[str, Any], context: List[Dict[str, Any]]
         "_generation_model": "deterministic_rules",
         "_fallback_reason": reason,
     }
+    challenge_for_prompt = _challenge_for_prompt(challenge)

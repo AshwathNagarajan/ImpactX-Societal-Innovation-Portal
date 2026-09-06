@@ -3,18 +3,23 @@ import { useNavigate } from "react-router-dom";
 import { categories, districts } from "../../data/referenceData.js";
 import Modal from "../../components/common/Modal.jsx";
 import { challengeService } from "../../services/challengeService.js";
+import { evidenceService } from "../../services/evidenceService.js";
 export default function SubmitChallenge() {
   const navigate = useNavigate();
   const [modal, setModal] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ title:"", description:"", category:"Agriculture", subCategory:"", district:"Ranchi", city:"", location:"", priority:"Medium", attempts:"", affected:"", impact:"", consent:false });
+  const [uploads, setUploads] = useState({ images: [], videos: [], documents: [] });
   const set = (k,v)=>setForm(f=>({...f,[k]:v}));
+  const setFiles = (key, files)=>setUploads(current=>({...current,[key]:Array.from(files || [])}));
   const submit = async (e) => {
     e.preventDefault();
     setBusy(true);
     setError("");
     try {
+      const allFiles = [...uploads.images, ...uploads.videos, ...uploads.documents];
+      const evidence = allFiles.length ? await evidenceService.upload(allFiles, "challenge_submission", "") : { items: [] };
       const response = await challengeService.create({
         submitted_by: { name: "Anonymous Citizen", email: "anonymous@impactx.in", phone: "", type: "Citizen" },
         title: form.title,
@@ -28,7 +33,7 @@ export default function SubmitChallenge() {
         people_affected: Number(form.affected || 0),
         existing_attempts: form.attempts,
         expected_impact: form.impact,
-        attachments: [],
+        attachments: evidence.items || [],
       });
       setModal(response.challenge_id);
     } catch (err) {
@@ -40,7 +45,7 @@ export default function SubmitChallenge() {
   return <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 md:py-12 lg:px-10 xl:px-0"><span className="rounded-full border border-blue/20 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue sm:text-sm">Citizen Submission</span><h1 className="mt-5 text-3xl font-semibold tracking-tight text-navy sm:text-4xl">Submit a Societal Challenge</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">No login required. Your submission enters AI analysis and government validation.</p>
     <form onSubmit={submit} className="mt-8 space-y-8">
       <Panel title="Challenge Information"><Input label="Challenge Title" v={form.title} on={v=>set("title",v)} required/><Text label="Description" v={form.description} on={v=>set("description",v)} required/><Select label="Category" v={form.category} on={v=>set("category",v)} opts={categories}/><Input label="Sub-category" v={form.subCategory} on={v=>set("subCategory",v)}/><Select label="District" v={form.district} on={v=>set("district",v)} opts={districts}/><Input label="City / Village" v={form.city} on={v=>set("city",v)}/><Input label="Exact location text" v={form.location} on={v=>set("location",v)}/><Select label="Urgency level" v={form.priority} on={v=>set("priority",v)} opts={["Low","Medium","High","Critical"]}/></Panel>
-      <Panel title="Supporting Information"><Upload label="Upload image placeholder"/><Upload label="Upload video placeholder"/><Upload label="Upload document placeholder"/><Text label="Existing attempts to solve the problem" v={form.attempts} on={v=>set("attempts",v)}/><Input label="Number of people affected" type="number" v={form.affected} on={v=>set("affected",v)} required/><Text label="Expected impact" v={form.impact} on={v=>set("impact",v)}/></Panel>
+      <Panel title="Supporting Information"><Upload label="Upload images" accept="image/*" files={uploads.images} on={files=>setFiles("images",files)}/><Upload label="Upload videos" accept="video/*" files={uploads.videos} on={files=>setFiles("videos",files)}/><Upload label="Upload documents" accept=".pdf,.doc,.docx,.txt,.csv,.md,image/*" files={uploads.documents} on={files=>setFiles("documents",files)}/><Text label="Existing attempts to solve the problem" v={form.attempts} on={v=>set("attempts",v)}/><Input label="Number of people affected" type="number" v={form.affected} on={v=>set("affected",v)} required/><Text label="Expected impact" v={form.impact} on={v=>set("impact",v)}/></Panel>
       <label className="flex gap-3 rounded-2xl border bg-white p-5 text-sm shadow-sm"><input type="checkbox" required checked={form.consent} onChange={e=>set("consent",e.target.checked)}/> I confirm that the information provided is accurate.</label>
       {error&&<p className="rounded-2xl bg-red-50 p-4 text-sm font-semibold text-red-600">{error}</p>}
       <button disabled={busy} className="impact-gradient min-h-11 rounded-xl px-6 py-3 font-semibold text-white shadow-sm disabled:opacity-60">{busy?"Submitting...":"Submit Challenge"}</button>
@@ -52,4 +57,4 @@ function Panel({ title, children }) { return <section className="rounded-2xl bor
 function Input({ label, v, on, type="text", required }) { return <label className="text-sm font-semibold text-slate-600">{label}<input required={required} type={type} value={v} onChange={e=>on(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue"/></label>; }
 function Text({ label, v, on, required }) { return <label className="text-sm font-semibold text-slate-600 lg:col-span-2">{label}<textarea required={required} value={v} onChange={e=>on(e.target.value)} rows="5" className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue"/></label>; }
 function Select({ label, v, on, opts }) { return <label className="text-sm font-semibold text-slate-600">{label}<select value={v} onChange={e=>on(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border px-4 py-3 outline-none focus:border-blue">{opts.map(o=><option key={o}>{o}</option>)}</select></label>; }
-function Upload({ label }) { return <div className="rounded-2xl border border-dashed bg-slate-50 p-5 text-sm font-semibold text-slate-500">{label}</div>; }
+function Upload({ label, accept, files, on }) { return <label className="rounded-2xl border border-dashed border-blue/25 bg-blue/10 p-5 text-sm font-semibold text-slate-200">{label}<input type="file" multiple accept={accept} onChange={e=>on(e.target.files)} className="mt-3 block w-full text-sm text-slate-300 file:mr-4 file:rounded-xl file:border-0 file:bg-blue file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"/><span className="mt-2 block text-xs font-medium text-slate-400">{files?.length ? `${files.length} file(s) selected` : "Choose files to store with OCR/text extraction where possible."}</span></label>; }

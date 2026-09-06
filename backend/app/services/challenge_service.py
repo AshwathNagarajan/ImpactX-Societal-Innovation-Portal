@@ -58,11 +58,14 @@ async def create_challenge(payload: ChallengeCreate) -> dict:
     now = utc_now()
     document = payload.model_dump()
     score = calculate_priority_score(document)
+    priority = priority_level(score)
     document.update(
         {
             "challenge_id": await generate_challenge_id(),
-            "status": "SUBMITTED",
-            "priority": priority_level(score),
+            "status": "UNDER_REVIEW" if priority == "CRITICAL" else "AI_VALIDATION",
+            "priority": priority,
+            "validation_mode": "ADMIN" if priority == "CRITICAL" else "AI",
+            "validation_status": "PENDING",
             "ai_analysis": {},
             "matched_institutes": [],
             "assigned_institute_id": None,
@@ -72,8 +75,71 @@ async def create_challenge(payload: ChallengeCreate) -> dict:
         }
     )
     await get_database().challenges.insert_one(document)
-    await create_notification("New challenge submitted", document["title"], role="ADMIN", entity_type="challenge", entity_id=document["challenge_id"])
-    return serialize_document(document)
+    await link_attachment_records(document)
+    if priority == "CRITICAL":
+        await create_notification("Critical challenge requires validation", document["title"], role="ADMIN", entity_type="challenge", entity_id=document["challenge_id"])
+        return serialize_document(document)
+    return await ai_validate_challenge(document["challenge_id"])
+
+
+async def link_attachment_records(document: dict) -> None:
+    evidence_ids = [item.get("evidence_id") for item in document.get("attachments", []) if item.get("evidence_id")]
+    if evidence_ids:
+        await get_database().evidence.update_many(
+            {"evidence_id": {"$in": evidence_ids}},
+            {"$set": {"entity_type": "challenge_submission", "entity_id": document["challenge_id"], "linked_at": utc_now()}},
+        )
+
+
+async def ai_validate_challenge(challenge_id: str) -> dict:
+    database = get_database()
+    try:
+        from app.services.ai_service import analyze_and_store
+
+        analysis = await analyze_and_store(challenge_id)
+        priority = analysis.get("priority", {})
+        severity = analysis.get("severity", {})
+        is_critical = priority.get("level") == "CRITICAL" or severity.get("level") == "CRITICAL"
+        status = "UNDER_REVIEW" if is_critical else "VALIDATED"
+        validation_status = "ADMIN_REVIEW_REQUIRED" if is_critical else "AI_APPROVED"
+        await database.challenges.update_one(
+            {"challenge_id": challenge_id},
+            {
+                "$set": {
+                    "status": status,
+                    "validation_mode": "ADMIN" if is_critical else "AI",
+                    "validation_status": validation_status,
+                    "ai_validation": {
+                        "approved": not is_critical,
+                        "reason": "Critical AI severity/priority requires admin validation." if is_critical else "AI validated this non-critical challenge for institute matching.",
+                        "validated_at": utc_now(),
+                        "analysis_source": analysis.get("audit", {}).get("generation_source"),
+                    },
+                    "updated_at": utc_now(),
+                }
+            },
+        )
+        updated = await database.challenges.find_one({"challenge_id": challenge_id})
+        if is_critical:
+            await create_notification("Critical challenge requires admin validation", updated["title"], role="ADMIN", entity_type="challenge", entity_id=challenge_id)
+        else:
+            await create_notification("AI-approved challenge ready for institutes", updated["title"], role="INSTITUTE", entity_type="challenge", entity_id=challenge_id)
+        return serialize_document(updated)
+    except Exception:
+        await database.challenges.update_one(
+            {"challenge_id": challenge_id},
+            {
+                "$set": {
+                    "status": "UNDER_REVIEW",
+                    "validation_mode": "ADMIN",
+                    "validation_status": "AI_VALIDATION_FAILED",
+                    "updated_at": utc_now(),
+                }
+            },
+        )
+        updated = await database.challenges.find_one({"challenge_id": challenge_id})
+        await create_notification("Challenge needs admin validation", updated["title"], role="ADMIN", entity_type="challenge", entity_id=challenge_id)
+        return serialize_document(updated)
 
 
 async def list_challenges(filters: Dict[str, Any], page: int = 1, limit: int = 20) -> dict:
@@ -124,6 +190,9 @@ async def update_challenge(challenge_id: str, updates: Dict[str, Any]) -> dict:
         "matched_institutes",
         "assigned_institute_id",
         "industry_partners",
+        "validation_mode",
+        "validation_status",
+        "ai_validation",
     }
     updates = {key: value for key, value in updates.items() if key in allowed}
     updates["updated_at"] = utc_now()

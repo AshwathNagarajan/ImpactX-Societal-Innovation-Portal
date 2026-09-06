@@ -1,6 +1,7 @@
 import { Check, Clock, Flag, Lock, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { projectService } from "../../services/projectService.js";
+import { evidenceService } from "../../services/evidenceService.js";
 import { getUser } from "../../utils/auth.js";
 import { getLifecycleProgress } from "../../utils/projectLifecycle.js";
 
@@ -56,6 +57,7 @@ export default function ProjectLifecycle({ project, current = "PROTOTYPE", steps
   const roleActions = actions.length ? actions : availableFallbackActions(currentStep?.stage, user?.role);
   const [busy, setBusy] = useState("");
   const [note, setNote] = useState("");
+  const [files, setFiles] = useState([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -65,9 +67,17 @@ export default function ProjectLifecycle({ project, current = "PROTOTYPE", steps
     setMessage("");
     setError("");
     try {
-      const response = await projectService.transition(projectId, action.target_status, note || action.description || "Lifecycle updated from project workspace.");
+      if (!files.length) {
+        setError("Attach progress documentation before updating the project lifecycle.");
+        setBusy("");
+        return;
+      }
+      const uploaded = await evidenceService.upload(files, "project_progress", projectId);
+      const evidenceIds = (uploaded.items || []).map((item) => item.evidence_id);
+      const response = await projectService.transition(projectId, action.target_status, note || action.description || "Lifecycle updated from project workspace.", evidenceIds);
       setMessage(`Project moved to ${labels[action.target_status] || action.target_status.replaceAll("_", " ")}.`);
       setNote("");
+      setFiles([]);
       onUpdated?.(response.data);
     } catch (err) {
       setError(err?.response?.data?.detail || "Unable to update lifecycle stage.");
@@ -115,6 +125,19 @@ export default function ProjectLifecycle({ project, current = "PROTOTYPE", steps
           {roleActions.length ? (
             <div className="mt-4 space-y-4">
               <textarea value={note} onChange={(event) => setNote(event.target.value)} rows="3" className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue focus:ring-4 focus:ring-blue/10" placeholder="Add an optional lifecycle note for the audit trail" />
+              <label className="block rounded-2xl border border-dashed border-blue/25 bg-blue/10 p-4 text-sm font-semibold text-slate-200">
+                Progress documentation
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,.pdf,.doc,.docx,.txt,.csv,.md"
+                  onChange={(event) => setFiles(Array.from(event.target.files || []))}
+                  className="mt-3 block w-full text-sm text-slate-300 file:mr-4 file:rounded-xl file:border-0 file:bg-blue file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+                />
+                <span className="mt-2 block text-xs font-medium text-slate-400">
+                  {files.length ? `${files.length} file(s) selected. Text will be extracted and stored for retrieval.` : "Required before stage updates. PDFs, documents, text and images are accepted."}
+                </span>
+              </label>
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 {roleActions.map((action) => (
                   <button key={action.target_status} disabled={busy === action.target_status} onClick={() => runAction(action)} className="impact-gradient min-h-11 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-105 disabled:opacity-60">
