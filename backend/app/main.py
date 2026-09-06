@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from app.api.router import api_router
 from app.core.config import settings
@@ -52,9 +52,19 @@ async def root():
     return {"ok": True, "service": "impactx-api"}
 
 
+@app.head("/")
+async def root_head():
+    return Response(status_code=200)
+
+
 @app.get("/api/health")
 async def health():
     return {"ok": True}
+
+
+@app.head("/api/health")
+async def health_head():
+    return Response(status_code=200)
 
 
 @app.get("/api/status")
