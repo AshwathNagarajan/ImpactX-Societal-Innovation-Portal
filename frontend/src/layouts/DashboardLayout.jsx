@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "../components/common/Sidebar.jsx";
 import NotificationDropdown from "../components/common/NotificationDropdown.jsx";
 import AccountMenu from "../components/common/AccountMenu.jsx";
+import Footer from "../components/common/Footer.jsx";
 export default function DashboardLayout({ title, items }) {
   const isAdmin = true;
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -28,6 +29,7 @@ export default function DashboardLayout({ title, items }) {
       <div className="mx-auto max-w-[1440px] px-4 py-6 pt-20 sm:px-6 md:py-8 lg:px-10 lg:py-10 lg:pt-10 xl:px-12">
         <Outlet/>
       </div>
+      <Footer compact />
     </main>
   </div>;
 }
