@@ -49,11 +49,16 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.get("/")
 async def root():
-    return {"status": "healthy", "service": "IMPACTX API", "environment": settings.app_env}
+    return {"ok": True, "service": "impactx-api"}
 
 
 @app.get("/api/health")
 async def health():
+    return {"ok": True}
+
+
+@app.get("/api/status")
+async def status():
     database = await database_health()
     return {
         "status": "healthy" if database["ok"] else "degraded",

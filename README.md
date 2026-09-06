@@ -120,6 +120,18 @@ After Render deploys, verify:
 https://<render-service>.onrender.com/api/health
 ```
 
+For UptimeRobot or any keep-alive monitor, use the lightweight health URL:
+
+```text
+https://<render-service>.onrender.com/api/health
+```
+
+It returns only a tiny `{"ok": true}` payload and does not ping MongoDB. Use the deeper diagnostic endpoint only when debugging:
+
+```text
+https://<render-service>.onrender.com/api/status
+```
+
 Seed sample database records from your local machine after setting `backend/.env` to the same MongoDB Atlas database:
 
 ```bash
@@ -178,6 +190,7 @@ Core endpoints currently scaffolded:
 
 ```text
 GET  /api/health
+GET  /api/status
 POST /api/auth/login
 POST /api/challenges
 GET  /api/challenges
