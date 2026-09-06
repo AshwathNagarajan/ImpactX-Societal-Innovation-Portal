@@ -10,7 +10,7 @@ export default function DashboardLayout({ title, items }) {
 
   return <div className="admin-route-shell min-h-screen lg:flex">
     <Sidebar title={title} items={items} dark={isAdmin} open={sidebarOpen} onClose={() => setSidebarOpen(false)}/>
-    <main className="min-w-0 flex-1">
+    <main className="flex min-w-0 flex-1 flex-col">
       <header className={`sticky top-0 z-20 flex min-h-[68px] items-center justify-between gap-3 border-b px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8 ${isAdmin ? "border-white/10 bg-slate-900/85" : "border-slate-200 bg-white/90"}`}>
         <div className={`min-w-0 transition duration-150 ${sidebarOpen ? "pointer-events-none opacity-0" : "opacity-100"}`}>
           <button type="button" onClick={() => setSidebarOpen(true)} className="group flex min-w-0 items-center gap-3 rounded-2xl px-2 py-1.5 text-left transition hover:bg-white/5" aria-label="Open navigation">
@@ -26,7 +26,7 @@ export default function DashboardLayout({ title, items }) {
           <AccountMenu title={title} dark={isAdmin}/>
         </div>
       </header>
-      <div className="mx-auto max-w-[1440px] px-4 py-6 pt-20 sm:px-6 md:py-8 lg:px-10 lg:py-10 lg:pt-10 xl:px-12">
+      <div className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 pt-20 sm:px-6 md:py-8 lg:px-10 lg:py-10 lg:pt-10 xl:px-12">
         <Outlet/>
       </div>
       <Footer compact />
