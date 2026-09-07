@@ -53,10 +53,9 @@ export default function ValidationQueue() {
     setError("");
     setMessage("");
     try {
-      if (status === "Validated") await adminService.approveChallenge(id);
-      else if (status === "Rejected") await adminService.rejectChallenge(id);
+      if (status === "Rejected") await adminService.rejectChallenge(id);
       else await adminService.requestInfo(id);
-      setRows((current) => status === "Validated" || status === "Rejected"
+      setRows((current) => status === "Rejected"
         ? current.filter((row) => row.id !== id)
         : current.map((row) => row.id === id ? { ...row, status: "UNDER_REVIEW" } : row));
       const text = `${id} moved to ${status}.`;
@@ -153,7 +152,8 @@ export default function ValidationQueue() {
 
   return (
     <div className="min-w-0">
-      <h1 className="text-3xl font-semibold tracking-tight text-navy md:text-4xl">Validation Queue</h1>
+      <h1 className="text-3xl font-semibold tracking-tight text-navy md:text-4xl">AI Exception Queue</h1>
+      <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300 md:text-base">Challenges are approved or filtered by AI at intake. This queue is for duplicates, service requests, threats, and submissions that need more information.</p>
       {message && <p className="mt-6 rounded-2xl bg-green/10 p-4 font-semibold text-green">{message}</p>}
       {error && <p className="mt-6 rounded-2xl bg-red-50 p-4 font-semibold text-red-600">{error}</p>}
       {!loading && <div className="mt-6 rounded-2xl border bg-white p-4 shadow-sm"><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search challenges, proposals, requests or support offers" className="min-h-12 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue" /></div>}
@@ -161,8 +161,8 @@ export default function ValidationQueue() {
         <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-blue">Assignment Requests</p>
-              <h2 className="mt-1 text-xl font-semibold text-navy">Institute requests waiting for admin approval</h2>
+              <p className="text-sm font-semibold text-blue">Legacy Assignment Requests</p>
+              <h2 className="mt-1 text-xl font-semibold text-navy">Requests created before direct institute acceptance</h2>
             </div>
             <span className="text-sm font-semibold text-slate-500">{visibleItems(assignmentRequests, search).length} pending</span>
           </div>
@@ -214,10 +214,15 @@ export default function ValidationQueue() {
       {loading ? (
         <div className="mt-8 rounded-2xl border bg-white p-6 text-sm font-semibold text-slate-600 shadow-sm">Loading live validation queue...</div>
       ) : (
-        <div className="scrollbar-thin mt-8 overflow-x-auto rounded-2xl border bg-white shadow-sm">
+        <section className="mt-8">
+          <div className="mb-4">
+            <p className="text-sm font-semibold text-blue">AI Intake Exceptions</p>
+            <h2 className="mt-1 text-xl font-semibold text-navy">Filtered challenge submissions</h2>
+          </div>
+          <div className="scrollbar-thin overflow-x-auto rounded-2xl border bg-white shadow-sm">
           <table className="w-full min-w-[860px] text-left text-sm md:min-w-[980px]">
             <thead className="bg-slate-50 text-slate-500">
-              <tr>{["Challenge ID", "Title", "Category", "District", "AI Priority Score", "Submitted Date", "Action"].map((heading) => <th key={heading} className="px-5 py-4">{heading}</th>)}</tr>
+              <tr>{["Challenge ID", "Title", "AI Classification", "District", "AI Priority Score", "Submitted Date", "Action"].map((heading) => <th key={heading} className="px-5 py-4">{heading}</th>)}</tr>
             </thead>
             <tbody>
               {visibleItems(rows, search).length ? visibleItems(rows, search).map((challenge) => (
@@ -231,18 +236,18 @@ export default function ValidationQueue() {
                   <td className="px-5 py-4">
                     <div className="flex flex-col gap-2 lg:flex-row">
                       <Link to={`/admin/review/${challenge.id}`} className="rounded-xl border px-3 py-2 text-center font-semibold text-blue">View</Link>
-                      <button disabled={!!busy} onClick={() => act(challenge.id, "Validated")} className="rounded-xl bg-green px-3 py-2 font-semibold text-white disabled:opacity-60">{busy === `${challenge.id}-Validated` ? "Saving..." : "Approve"}</button>
                       <button disabled={!!busy} onClick={() => act(challenge.id, "Rejected")} className="rounded-xl bg-red-600 px-3 py-2 font-semibold text-white disabled:opacity-60">Reject</button>
                       <button disabled={!!busy} onClick={() => act(challenge.id, "Under Review")} className="rounded-xl bg-orange px-3 py-2 font-semibold text-white disabled:opacity-60">Request Info</button>
                     </div>
                   </td>
                 </tr>
               )) : (
-                <tr><td colSpan="7" className="px-5 py-10 text-center font-semibold text-slate-500">No matching live challenges are waiting for validation.</td></tr>
+                <tr><td colSpan="7" className="px-5 py-10 text-center font-semibold text-slate-500">No matching AI intake exceptions need review.</td></tr>
               )}
             </tbody>
           </table>
-        </div>
+          </div>
+        </section>
       )}
     </div>
   );

@@ -10,5 +10,7 @@ export const instituteService = {
   requestAssignment: (challengeId) => api.post(`/institute/challenges/${challengeId}/request-assignment`).then((res) => res.data),
   rejectChallenge: (challengeId) => api.post(`/institute/challenges/${challengeId}/reject`).then((res) => res.data),
   submitProposal: (payload) => api.post("/institute/proposals", payload).then((res) => res.data),
+  proposalOffers: () => api.get("/institute/proposal-offers").then((res) => res.data),
+  acceptProposalOffer: (offerId) => api.post(`/institute/proposal-offers/${offerId}/accept`).then((res) => res.data),
   projects: () => api.get("/institute/projects").then((res) => res.data),
 };

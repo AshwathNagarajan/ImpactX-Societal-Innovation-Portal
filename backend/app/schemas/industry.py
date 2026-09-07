@@ -39,3 +39,17 @@ class ProjectSupportRequest(BaseModel):
     funding_type: str = ""
     milestone_release: str = ""
     csr_category: str = ""
+
+
+class ProposalOfferCreate(BaseModel):
+    proposal_id: str
+    support_type: str = "Technical Mentorship"
+    contribution: str
+    mentor_name: str = ""
+    timeline: str = ""
+    notes: str = ""
+    funding_amount: Optional[int] = None
+    currency: str = "INR"
+    funding_type: str = ""
+    milestone_release: str = ""
+    csr_category: str = ""

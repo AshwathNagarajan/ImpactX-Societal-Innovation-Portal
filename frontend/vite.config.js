@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [tailwindcss()],
+  plugins: [react(), tailwindcss()],
   envPrefix: ["VITE_", "API_"],
   build: {
     chunkSizeWarningLimit: 1000,
@@ -40,7 +41,6 @@ export default defineConfig({
     exclude: ["lucide-react"],
   },
   server: {
-    hmr: false,
     headers: {
       "Cache-Control": "no-store",
     },

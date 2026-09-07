@@ -69,7 +69,7 @@ export default function AssignedChallenges() {
           })}
         </div>
       ) : (
-        <div className="mt-8 rounded-2xl border bg-white p-6 text-sm font-semibold text-slate-600 shadow-sm">No challenges are assigned to your institute yet. Request assignment from a challenge detail page.</div>
+        <div className="mt-8 rounded-2xl border bg-white p-6 text-sm font-semibold text-slate-600 shadow-sm">No challenges are accepted by your institute yet. Open an AI-approved challenge and accept it to begin proposal development.</div>
       )}
     </div>
   );

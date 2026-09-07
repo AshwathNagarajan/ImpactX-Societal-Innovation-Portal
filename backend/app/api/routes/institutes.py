@@ -52,6 +52,16 @@ async def submit_proposal(payload: ProposalCreate, user=Depends(require_institut
     return {"success": True, "data": await institute_service.submit_proposal(payload, user)}
 
 
+@router.get("/proposal-offers")
+async def proposal_offers(user=Depends(require_institute)):
+    return {"success": True, "items": await institute_service.proposal_offers(user)}
+
+
+@router.post("/proposal-offers/{offer_id}/accept")
+async def accept_proposal_offer(offer_id: str, user=Depends(require_institute)):
+    return {"success": True, "data": await institute_service.accept_proposal_offer(offer_id, user)}
+
+
 @router.get("/projects")
 async def projects(user=Depends(require_institute)):
     return {"success": True, "items": await institute_service.projects(user)}

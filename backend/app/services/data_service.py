@@ -9,7 +9,7 @@ from app.utils.serializers import serialize_document
 
 CATEGORIES = ["Agriculture", "Healthcare", "Education", "Water & Sanitation", "Environment", "Infrastructure", "Accessibility", "Livelihood", "Disaster Management"]
 DISTRICTS = ["Ranchi", "East Singhbhum", "Sahibganj", "Dumka", "Dhanbad", "Bokaro", "Hazaribagh", "Palamu", "Deoghar", "Giridih", "Lohardaga", "Gumla", "West Singhbhum"]
-STATUSES = ["Submitted", "Under Review", "Validated", "Assigned", "In Development", "Pilot Testing", "Implemented"]
+STATUSES = ["AI Screening", "Open For Institute", "Service Request", "Duplicate", "Information Required", "Assigned", "In Development", "Pilot Testing", "Implemented"]
 PRIORITIES = ["Low", "Medium", "High", "Critical"]
 SUPPORT_TYPES = ["Funding", "Technical Mentorship", "Equipment", "API / Cloud Credits", "Prototype Support", "Pilot Deployment", "Manufacturing", "Market Access"]
 
@@ -19,6 +19,12 @@ def display_status(value: str | None) -> str:
         "SUBMITTED": "Submitted",
         "UNDER_REVIEW": "Under Review",
         "VALIDATED": "Validated",
+        "OPEN_FOR_INSTITUTE": "Open For Institute",
+        "SERVICE_REQUEST": "Service Request",
+        "DUPLICATE": "Duplicate",
+        "QUARANTINED": "Quarantined",
+        "INFO_REQUIRED": "Information Required",
+        "AI_SCREENING": "AI Screening",
         "ASSIGNED": "Assigned",
         "IN_DEVELOPMENT": "In Development",
         "DEVELOPMENT": "In Development",

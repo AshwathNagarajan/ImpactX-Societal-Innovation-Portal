@@ -69,7 +69,7 @@ async def assigned_challenges(user: dict) -> list[dict]:
 
 
 async def recommended_challenges() -> list[dict]:
-    cursor = get_database().challenges.find({"status": "VALIDATED"}).limit(20)
+    cursor = get_database().challenges.find({"status": "OPEN_FOR_INSTITUTE"}).limit(20)
     return [serialize_document(item) async for item in cursor]
 
 
@@ -84,7 +84,7 @@ async def ai_recommendations(user: dict) -> list[dict]:
     institute = await database.institutes.find_one({"name": {"$regex": user.get("name", ""), "$options": "i"}})
     if not institute:
         institute = await database.institutes.find_one({})
-    challenges = [item async for item in database.challenges.find({"status": {"$in": ["VALIDATED", "SUBMITTED", "UNDER_REVIEW"]}}).limit(50)]
+    challenges = [item async for item in database.challenges.find({"status": "OPEN_FOR_INSTITUTE"}).limit(50)]
     if not institute:
         return [serialize_document(item) for item in challenges[:10]]
     ranked = []
@@ -121,6 +121,88 @@ async def submit_proposal(payload: ProposalCreate, user: dict) -> dict:
     )
     await record_event("PROPOSAL_SUBMITTED", user, "challenge", payload.challenge_id, {"proposal_id": str(document.get("_id", "")), "need_industry_support": payload.need_industry_support})
     return serialize_document(document)
+
+
+async def proposal_offers(user: dict) -> list[dict]:
+    database = get_database()
+    identity = await institute_identity(user)
+    offers = [item async for item in database.proposal_offers.find({"institute_id": {"$in": identity["aliases"]}, "status": "OFFERED"}).sort("created_at", -1)]
+    proposal_ids = [item.get("proposal_id") for item in offers]
+    proposals = {
+        str(item.get("_id")): serialize_document(item)
+        async for item in database.proposals.find({"_id": {"$in": [ObjectId(value) for value in proposal_ids if ObjectId.is_valid(str(value))]}})
+    }
+    for offer in offers:
+        offer["proposal"] = proposals.get(offer.get("proposal_id"), {})
+    return [serialize_document(item) for item in offers]
+
+
+async def accept_proposal_offer(offer_id: str, user: dict) -> dict:
+    from fastapi import HTTPException
+    from app.utils.mongo import not_found
+
+    database = get_database()
+    identity = await institute_identity(user)
+    query = {"_id": ObjectId(offer_id)} if ObjectId.is_valid(offer_id) else {"id": offer_id}
+    offer = await database.proposal_offers.find_one(query)
+    if not offer:
+        not_found("Industry offer not found")
+    if offer.get("institute_id") not in identity["aliases"]:
+        raise HTTPException(status_code=403, detail="This offer belongs to another institute.")
+    challenge_id = offer.get("challenge_id")
+    institute_locked = await database.tie_ups.find_one({"challenge_id": challenge_id, "institute_id": {"$in": identity["aliases"]}, "status": {"$in": ["SELECTED", "GOV_APPROVED"]}})
+    industry_locked = await database.tie_ups.find_one({"challenge_id": challenge_id, "industry_user_id": offer.get("industry_user_id"), "status": {"$in": ["SELECTED", "GOV_APPROVED"]}})
+    if institute_locked or industry_locked:
+        raise HTTPException(status_code=409, detail="This challenge already has a locked collaboration for one of these partners.")
+
+    proposal = await database.proposals.find_one({"_id": ObjectId(offer.get("proposal_id"))})
+    if not proposal:
+        not_found("Proposal not found")
+    now = utc_now()
+    tie_up = {
+        "challenge_id": challenge_id,
+        "proposal_id": offer.get("proposal_id"),
+        "offer_id": str(offer["_id"]),
+        "institute_id": identity["org_id"],
+        "institute_name": identity["name"],
+        "industry_user_id": offer.get("industry_user_id"),
+        "industry_name": offer.get("industry_name"),
+        "status": "SELECTED",
+        "created_at": now,
+        "updated_at": now,
+    }
+    await database.tie_ups.insert_one(tie_up)
+    joint = {
+        "challenge_id": challenge_id,
+        "proposal_id": offer.get("proposal_id"),
+        "offer_id": str(offer["_id"]),
+        "tie_up_id": str(tie_up["_id"]),
+        "institute_id": identity["org_id"],
+        "institute_name": identity["name"],
+        "industry_user_id": offer.get("industry_user_id"),
+        "industry_name": offer.get("industry_name"),
+        "status": "GOV_REVIEW",
+        "solution": proposal.get("proposed_solution", ""),
+        "technology": proposal.get("technology", ""),
+        "budget": offer.get("funding_amount"),
+        "support_type": offer.get("support_type"),
+        "industry_contribution": offer.get("contribution"),
+        "timeline": offer.get("timeline") or proposal.get("estimated_duration", ""),
+        "expected_impact": proposal.get("expected_outcome", ""),
+        "created_at": now,
+        "updated_at": now,
+    }
+    await database.joint_proposals.insert_one(joint)
+    await database.proposal_offers.update_one({"_id": offer["_id"]}, {"$set": {"status": "ACCEPTED", "accepted_at": now, "updated_at": now}})
+    await database.proposal_offers.update_many(
+        {"challenge_id": challenge_id, "_id": {"$ne": offer["_id"]}, "$or": [{"institute_id": {"$in": identity["aliases"]}}, {"industry_user_id": offer.get("industry_user_id")}], "status": "OFFERED"},
+        {"$set": {"status": "LOCKED_OUT", "updated_at": now}},
+    )
+    await database.proposals.update_one({"_id": proposal["_id"]}, {"$set": {"status": "TIE_UP_SELECTED", "selected_offer_id": str(offer["_id"]), "updated_at": now}})
+    await record_event("TIE_UP_SELECTED", user, "challenge", challenge_id, {"joint_proposal_id": str(joint["_id"]), "industry": offer.get("industry_name")})
+    result = serialize_document(joint)
+    result["joint_proposal_id"] = result.get("id")
+    return result
 
 
 async def accept_challenge(challenge_id: str, user: dict) -> dict:

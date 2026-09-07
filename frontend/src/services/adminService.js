@@ -14,6 +14,8 @@ export const adminService = {
   updateProposal: (proposalId, payload) => api.put(`/admin/proposals/${proposalId}`, payload).then((res) => res.data),
   supportOffers: (status = "") => api.get("/admin/support-offers", { params: status ? { status } : {} }).then((res) => res.data),
   updateSupportOffer: (offerId, payload) => api.put(`/admin/support-offers/${offerId}`, payload).then((res) => res.data),
+  jointProposals: (status = "") => api.get("/admin/joint-proposals", { params: status ? { status } : {} }).then((res) => res.data),
+  updateJointProposal: (jointId, payload) => api.put(`/admin/joint-proposals/${jointId}`, payload).then((res) => res.data),
   users: () => api.get("/admin/users").then((res) => res.data),
   createUser: (payload) => api.post("/admin/users", payload).then((res) => res.data),
   updateUser: (userId, payload) => api.put(`/admin/users/${userId}`, payload).then((res) => res.data),

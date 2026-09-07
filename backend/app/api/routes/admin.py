@@ -71,3 +71,13 @@ async def support_offers(status: str = ""):
 @router.put("/support-offers/{offer_id}")
 async def update_support_offer(offer_id: str, payload: ReviewAction, user=Depends(require_admin)):
     return {"success": True, "data": await challenge_service.update_support_offer_status(offer_id, payload.status, payload.comment, user)}
+
+
+@router.get("/joint-proposals")
+async def joint_proposals(status: str = ""):
+    return {"success": True, "items": await challenge_service.list_joint_proposals(status or None)}
+
+
+@router.put("/joint-proposals/{joint_id}")
+async def update_joint_proposal(joint_id: str, payload: ReviewAction, user=Depends(require_admin)):
+    return {"success": True, "data": await challenge_service.update_joint_proposal_status(joint_id, payload.status, payload.comment, user)}

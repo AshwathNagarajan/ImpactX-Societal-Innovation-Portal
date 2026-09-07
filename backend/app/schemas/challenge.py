@@ -6,9 +6,12 @@ from pydantic import BaseModel, EmailStr, Field
 
 class SubmittedBy(BaseModel):
     name: str = Field(..., min_length=2)
-    email: EmailStr
+    email: Optional[EmailStr] = None
     phone: str = ""
     type: str = "Citizen"
+    mobile_verified: bool = False
+    verification_id: str = ""
+    notification_consent: bool = True
 
 
 class ChallengeCreate(BaseModel):

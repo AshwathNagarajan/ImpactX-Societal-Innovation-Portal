@@ -83,8 +83,7 @@ export default function ChallengeReview() {
     setMessage("");
     setError("");
     try {
-      if (action === "Validate Challenge") await adminService.approveChallenge(id);
-      else if (action === "Reject") await adminService.rejectChallenge(id);
+      if (action === "Reject") await adminService.rejectChallenge(id);
       else if (action === "Request More Information") await adminService.requestInfo(id);
       else if (action === "Assign Institute") {
         if (!instituteId) throw new Error("Run AI analysis to get a live institute recommendation before assigning.");
@@ -110,7 +109,7 @@ export default function ChallengeReview() {
         <div>
           <p className="text-sm font-semibold text-blue">Admin AI Review Center</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-navy md:text-4xl">Challenge Review</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 md:text-base">Review citizen evidence, AI analysis, duplicate signals and recommended assignment partners before human approval.</p>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 md:text-base">Inspect citizen evidence, AI decisions, duplicate signals and recommended partners. Challenge intake approval is handled by AI; admin review is only for exceptions and deeper analysis.</p>
         </div>
         <button onClick={runAnalysis} disabled={analysisBusy} className="impact-gradient min-h-11 rounded-xl px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">{analysisBusy ? "Analyzing..." : "Run AI Analysis"}</button>
       </div>
@@ -150,10 +149,10 @@ export default function ChallengeReview() {
           {message && <p className="rounded-2xl bg-green/10 p-4 text-sm font-semibold text-green">{message}</p>}
           {error && <p className="rounded-2xl bg-red-50 p-4 text-sm font-semibold text-red-600">{error}</p>}
           <section className="rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-navy">Validation Actions</h2>
+            <h2 className="text-lg font-semibold text-navy">Exception Actions</h2>
             <div className="mt-5 grid gap-3">
-              {["Validate Challenge", "Reject", "Request More Information", "Change Category", "Override Severity", "Assign Institute"].map((label, index) => (
-                <button key={label} disabled={!!actionBusy || (label === "Assign Institute" && !topInstituteId)} onClick={() => runAction(label)} className={`min-h-11 rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-60 ${index === 0 ? "bg-green text-white" : index === 1 ? "bg-red-50 text-red-600" : "border border-slate-200 bg-white text-slate-700"}`}>{actionBusy === label ? "Saving..." : label}</button>
+              {["Reject", "Request More Information", "Change Category", "Override Severity", "Assign Institute"].map((label, index) => (
+                <button key={label} disabled={!!actionBusy || (label === "Assign Institute" && !topInstituteId)} onClick={() => runAction(label)} className={`min-h-11 rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-60 ${index === 0 ? "bg-red-50 text-red-600" : "border border-slate-200 bg-white text-slate-700"}`}>{actionBusy === label ? "Saving..." : label}</button>
               ))}
             </div>
           </section>

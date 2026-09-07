@@ -1,6 +1,8 @@
+from bson import ObjectId
+
 from app.ai.matching.industry_matcher import recommend_industries_for_project
 from app.core.database import get_database
-from app.schemas.industry import PartnershipCreate, ProjectSupportRequest
+from app.schemas.industry import PartnershipCreate, ProjectSupportRequest, ProposalOfferCreate
 from app.utils.helpers import utc_now
 from app.utils.serializers import serialize_document
 from app.services.audit_service import record_event
@@ -16,8 +18,16 @@ async def dashboard(user: dict) -> dict:
 
 
 async def recommended_projects() -> list[dict]:
-    cursor = get_database().projects.find({"status": {"$in": ["ASSIGNED", "RESEARCH", "PROTOTYPE", "TESTING", "PILOT"]}}).limit(20)
-    return [serialize_document(item) async for item in cursor]
+    database = get_database()
+    proposals = [item async for item in database.proposals.find({"status": "SUBMITTED", "need_industry_support": True}).limit(50)]
+    challenge_ids = [item.get("challenge_id") for item in proposals]
+    challenges = {
+        item.get("challenge_id"): serialize_document(item)
+        async for item in database.challenges.find({"challenge_id": {"$in": challenge_ids}})
+    }
+    for proposal in proposals:
+        proposal["challenge"] = challenges.get(proposal.get("challenge_id"), {})
+    return [serialize_document(item) for item in proposals]
 
 
 async def ai_recommendations(user: dict) -> list[dict]:
@@ -40,6 +50,42 @@ async def ai_recommendations(user: dict) -> list[dict]:
         document["why_recommended"] = match.get("reason", "")
         ranked.append(document)
     return sorted(ranked, key=lambda item: item.get("ai_match", 0), reverse=True)[:10]
+
+
+async def offer_on_proposal(payload: ProposalOfferCreate, user: dict) -> dict:
+    database = get_database()
+    proposal = await database.proposals.find_one({"_id": ObjectId(payload.proposal_id)} if ObjectId.is_valid(payload.proposal_id) else {"id": payload.proposal_id})
+    if not proposal:
+        from app.utils.mongo import not_found
+
+        not_found("Proposal not found")
+    existing_selected = await database.proposal_offers.find_one({"challenge_id": proposal.get("challenge_id"), "industry_user_id": user["id"], "status": "ACCEPTED"})
+    if existing_selected:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=409, detail="This industry is already tied up for this challenge.")
+    now = utc_now()
+    document = payload.model_dump()
+    document.update(
+        {
+            "proposal_id": str(proposal["_id"]),
+            "challenge_id": proposal.get("challenge_id"),
+            "institute_id": proposal.get("institute_id"),
+            "industry_user_id": user["id"],
+            "industry_name": user.get("name") or "Industry Partner",
+            "status": "OFFERED",
+            "created_at": now,
+            "updated_at": now,
+        }
+    )
+    await database.proposal_offers.update_one(
+        {"proposal_id": document["proposal_id"], "industry_user_id": user["id"], "status": {"$in": ["OFFERED", "ACCEPTED"]}},
+        {"$set": document},
+        upsert=True,
+    )
+    saved = await database.proposal_offers.find_one({"proposal_id": document["proposal_id"], "industry_user_id": user["id"], "status": document["status"]})
+    await record_event("INDUSTRY_PROPOSAL_OFFERED", user, "challenge", proposal.get("challenge_id", ""), {"proposal_id": document["proposal_id"], "support_type": payload.support_type})
+    return serialize_document(saved or document)
 
 
 async def create_partnership(payload: PartnershipCreate, user: dict) -> dict:

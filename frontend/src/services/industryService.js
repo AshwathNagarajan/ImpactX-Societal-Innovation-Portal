@@ -7,4 +7,5 @@ export const industryService = {
   projects: () => api.get("/industry/projects").then((res) => res.data),
   createPartnership: (payload) => api.post("/industry/partnerships", payload).then((res) => res.data),
   supportProject: (projectId, payload = {}) => api.post(`/industry/projects/${projectId}/support`, payload).then((res) => res.data),
+  offerProposal: (payload) => api.post("/industry/proposal-offers", payload).then((res) => res.data),
 };

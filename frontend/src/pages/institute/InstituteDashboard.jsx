@@ -36,14 +36,14 @@ export default function InstituteDashboard() {
 
   const acceptedProjects = projects.filter((project) => getLifecycleProgress(project) < 100);
   const cards = [
-    ["Recommended", recommended.length.toString(), "ready to request", Lightbulb],
-    ["Requested", requests.filter((item) => item.status === "REQUESTED").length.toString(), "awaiting admin", Medal],
-    ["Assigned", assigned.length.toString(), "approved by admin", GraduationCap],
+    ["Recommended", recommended.length.toString(), "ready to accept", Lightbulb],
+    ["Requested", requests.filter((item) => item.status === "REQUESTED").length.toString(), "legacy requests", Medal],
+    ["Assigned", assigned.length.toString(), "accepted by institute", GraduationCap],
     ["Accepted Projects", acceptedProjects.length.toString(), "in lifecycle", Users],
     ["Industry Collaborations", data.industries.length.toString(), "active", Handshake],
     ["Research Outputs", "11", "filed or published", Medal],
   ];
-  const top = recommended[0] || data.challenges.find((challenge) => challenge.status === "Validated") || data.challenges[0];
+  const top = recommended[0] || data.challenges.find((challenge) => challenge.status === "Open For Institute") || data.challenges[0];
 
   return (
     <div className="min-w-0 space-y-10">
@@ -52,13 +52,13 @@ export default function InstituteDashboard() {
           <p className="text-sm font-semibold text-blue">AI Challenge Matching</p>
           <h2 className="text-xl font-semibold text-navy md:text-2xl">Recommended For Your Institute</h2>
         </div>
-        <AIRecommendationCard title={top.title} subtitle={`${top.category} | ${top.district} | ${top.priority || top.urgency || "Medium"} priority`} match={top.ai_match || 94} reason={top.why_recommended || "Open this challenge to request assignment from the admin review team."} tags={top.matching_expertise || ["AI", "IoT", top.category, "Field Research"].filter(Boolean)} actionLabel="View Matched Challenge" onAction={() => navigate(`/challenges/${top.challenge_id || top.id}`)} />
+        <AIRecommendationCard title={top.title} subtitle={`${top.category} | ${top.district} | ${top.priority || top.urgency || "Medium"} priority`} match={top.ai_match || 94} reason={top.why_recommended || "AI approved this challenge for institute acceptance and proposal development."} tags={top.matching_expertise || ["AI", "IoT", top.category, "Field Research"].filter(Boolean)} actionLabel="View Matched Challenge" onAction={() => navigate(`/challenges/${top.challenge_id || top.id}`)} />
       </section>}
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">{cards.map((card) => <KPICard key={card[0]} title={card[0]} value={card[1]} note={card[2]} icon={card[3]} />)}</div>
-      <WorkflowSection title="Requested Challenges" empty="No assignment requests are waiting for admin review.">
+      <WorkflowSection title="Legacy Requests" empty="No legacy assignment requests are waiting.">
         {requests.filter((item) => item.status === "REQUESTED").slice(0, 4).map((item) => <StatusCard key={item.id} title={item.challenge_id} body={item.comment || "Assignment request sent to admin."} status="Requested" />)}
       </WorkflowSection>
-      <WorkflowSection title="Assigned Challenges" empty="No approved assignments yet.">
+      <WorkflowSection title="Accepted Challenges" empty="No accepted challenges yet.">
         {assigned.slice(0, 4).map((challenge) => <ChallengeCard key={challenge.challenge_id || challenge.id} challenge={{ ...challenge, id: challenge.challenge_id || challenge.id }} />)}
       </WorkflowSection>
       <WorkflowSection title="Accepted Projects" empty="Accept an assigned challenge to create a project workspace.">

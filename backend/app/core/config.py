@@ -39,7 +39,18 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> List[str]:
         configured = [origin.strip() for origin in self.cors_origins_csv.split(",") if origin.strip()]
-        return list(dict.fromkeys([self.frontend_url, *configured, "http://localhost:5173", "http://127.0.0.1:5173"]))
+        return list(
+            dict.fromkeys(
+                [
+                    self.frontend_url,
+                    *configured,
+                    "http://localhost:5173",
+                    "http://127.0.0.1:5173",
+                    "http://localhost:4173",
+                    "http://127.0.0.1:4173",
+                ]
+            )
+        )
 
     @property
     def is_development(self) -> bool:

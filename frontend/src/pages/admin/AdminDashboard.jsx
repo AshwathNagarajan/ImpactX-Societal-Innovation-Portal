@@ -12,16 +12,16 @@ const neon = ["#22d3ee", "#a78bfa", "#34d399", "#fbbf24", "#fb7185"];
 
 export default function AdminDashboard(){
   const { data } = useImpactData();
-  const [reviewCounts, setReviewCounts] = useState({ assignments: 0, proposals: 0, support: 0 });
+  const [reviewCounts, setReviewCounts] = useState({ assignments: 0, proposals: 0, support: 0, exceptions: 0 });
   const { chartData } = data;
   const cards = data.kpis.map((k,i)=>[k[0],k[1],k[2],iconMap[i] || ClipboardList]);
   const statusLine = chartData.status.map((item, index) => ({ name: item.name, value: item.value, target: Math.max(1, item.value + index + 1) }));
   const districtLine = chartData.district.map((item, index) => ({ name: item.name, challenges: item.challenges, active: Math.max(0, item.challenges - (index % 2)) }));
   useEffect(() => {
     let active = true;
-    Promise.all([adminService.assignmentRequests(), adminService.proposals("SUBMITTED"), adminService.supportOffers("PENDING_REVIEW")])
-      .then(([assignments, proposals, support]) => active && setReviewCounts({ assignments: assignments.items?.length || 0, proposals: proposals.items?.length || 0, support: support.items?.length || 0 }))
-      .catch(() => active && setReviewCounts({ assignments: 0, proposals: 0, support: 0 }));
+    Promise.all([adminService.assignmentRequests(), adminService.jointProposals("GOV_REVIEW"), adminService.supportOffers("PENDING_REVIEW"), adminService.pendingChallenges()])
+      .then(([assignments, proposals, support, exceptions]) => active && setReviewCounts({ assignments: assignments.items?.length || 0, proposals: proposals.items?.length || 0, support: support.items?.length || 0, exceptions: exceptions.items?.length || 0 }))
+      .catch(() => active && setReviewCounts({ assignments: 0, proposals: 0, support: 0, exceptions: 0 }));
     return () => { active = false; };
   }, []);
 
@@ -32,9 +32,9 @@ export default function AdminDashboard(){
         <h2 className="text-lg font-semibold text-white md:text-xl">Requires Attention</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-3">{[
           `${reviewCounts.assignments} Assignment Requests`,
-          `${reviewCounts.proposals} Proposal Reviews`,
+          `${reviewCounts.proposals} Joint Proposals`,
           `${reviewCounts.support} Support Offers`,
-          `${data.challenges.filter(c=>["Submitted","Under Review"].includes(c.status)).length} Awaiting Validation`,
+          `${reviewCounts.exceptions} AI Exceptions`,
           `${data.projects.filter(p=>getLifecycleProgress(p)<70).length} Projects Delayed`,
           `${data.challenges.filter(c=>c.priority==="Critical"||c.priority==="High").length} High Priority Challenges`,
         ].map((x,i)=><div key={x} className={`rounded-2xl border border-white/10 bg-white/5 p-5 ${i===5?"text-rose-300":"text-amber-300"}`}><p className="text-3xl font-semibold">{x.split(" ")[0]}</p><p className="mt-2 text-sm text-slate-300">{x.replace(x.split(" ")[0],"")}</p></div>)}</div>
