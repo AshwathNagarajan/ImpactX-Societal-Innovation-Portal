@@ -41,10 +41,13 @@ async def request_otp(mobile: str) -> dict:
     }
     await database.otp_verifications.insert_one(document)
     sms = await send_sms(clean, f"Your IMPACTX verification OTP is {otp}. It expires in 10 minutes.")
-    response = {"success": True, "verification_id": str(document["_id"]), "sms": sms}
-    if sms.get("provider") == "development":
-        response["dev_otp"] = otp
-    return response
+    if not sms.get("sent"):
+        await database.otp_verifications.update_one(
+            {"_id": document["_id"]},
+            {"$set": {"send_failed": True, "send_error": sms, "updated_at": utc_now()}},
+        )
+        raise HTTPException(status_code=502, detail=sms.get("message") or "Unable to send OTP SMS.")
+    return {"success": True, "verification_id": str(document["_id"]), "message": "OTP sent to your mobile number."}
 
 
 async def verify_otp(verification_id: str, mobile: str, otp: str) -> dict:

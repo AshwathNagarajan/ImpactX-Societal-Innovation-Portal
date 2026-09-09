@@ -23,6 +23,14 @@ class Settings(BaseSettings):
     hf_ocr_model: str = "Qwen/Qwen3-VL-30B-A3B-Instruct"
     hf_embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
+    sms_provider: str = ""
+    sms_from_number: str = "IMPACTX"
+    fast2sms_api_key: str = ""
+    fast2sms_route: str = "otp"
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_from_number: str = ""
+
     frontend_url: str = "http://localhost:5173"
     cors_origins_csv: str = ""
     duplicate_high_threshold: float = 0.90
